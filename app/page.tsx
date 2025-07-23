@@ -3,11 +3,407 @@ import { useState, useEffect, useRef } from "react"
 import type React from "react"
 
 import { motion, AnimatePresence, useScroll } from "framer-motion"
-import { Linkedin, Brain, Zap, Layers, Sparkles, ArrowRight, Mail, Eye, Target, ChevronDown } from "lucide-react"
+import {
+  Linkedin,
+  Brain,
+  Zap,
+  Layers,
+  Sparkles,
+  ArrowRight,
+  Mail,
+  Eye,
+  Target,
+  ChevronDown,
+  MousePointer2,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 // Reality Modes
 type RealityMode = "architect" | "innovator" | "transformer" | "visionary"
+
+// Breathing Background Animation
+const BreathingBackground = ({ color }: { color: string }) => {
+  return (
+    <motion.div
+      className="absolute inset-0 rounded-full opacity-20"
+      style={{ backgroundColor: color }}
+      animate={{
+        scale: [1, 1.1, 1],
+        opacity: [0.1, 0.3, 0.1],
+      }}
+      transition={{
+        duration: 4,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      }}
+    />
+  )
+}
+
+// Interactive Story Icon Component
+const InteractiveStoryIcon = ({
+  icon,
+  beforeState,
+  afterState,
+  color,
+  type = "click",
+}: {
+  icon: React.ReactNode
+  beforeState: string
+  afterState: string
+  color: string
+  type?: "click" | "drag" | "hover"
+}) => {
+  const [isRevealed, setIsRevealed] = useState(false)
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleDragStart = () => {
+    if (type === "drag") {
+      setIsDragging(true)
+    }
+  }
+
+  const handleDrag = (event: any, info: any) => {
+    if (type === "drag") {
+      setDragPosition({ x: info.offset.x, y: info.offset.y })
+      const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2)
+      setIsRevealed(distance > 30)
+    }
+  }
+
+  const handleDragEnd = () => {
+    if (type === "drag") {
+      setIsDragging(false)
+      setDragPosition({ x: 0, y: 0 })
+      setTimeout(() => setIsRevealed(false), 2000)
+    }
+  }
+
+  return (
+    <div className="relative">
+      <motion.div
+        className="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer"
+        style={{ backgroundColor: `${color}20` }}
+        onClick={() => type === "click" && setIsRevealed(!isRevealed)}
+        onHoverStart={() => type === "hover" && setIsRevealed(true)}
+        onHoverEnd={() => type === "hover" && setIsRevealed(false)}
+        drag={type === "drag"}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        whileDrag={{ scale: 1.2, rotate: 5 }}
+        animate={{
+          x: dragPosition.x,
+          y: dragPosition.y,
+          boxShadow: isRevealed ? `0 0 30px ${color}60` : `0 0 10px ${color}20`,
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      >
+        {/* Breathing background */}
+        <BreathingBackground color={color} />
+
+        {/* Before state */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ color: color }}
+          animate={{
+            opacity: isRevealed ? 0 : 1,
+            scale: isRevealed ? 0.8 : 1,
+            rotateY: isRevealed ? 180 : 0,
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          {icon}
+        </motion.div>
+
+        {/* After state */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs"
+          animate={{
+            opacity: isRevealed ? 1 : 0,
+            scale: isRevealed ? 1 : 0.8,
+            rotateY: isRevealed ? 0 : -180,
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          ✨
+        </motion.div>
+
+        {/* Ripple effect on interaction */}
+        <AnimatePresence>
+          {isRevealed && (
+            <motion.div
+              className="absolute inset-0 rounded-full border-2"
+              style={{ borderColor: color }}
+              initial={{ scale: 1, opacity: 0.8 }}
+              animate={{ scale: 2, opacity: 0 }}
+              exit={{ scale: 1, opacity: 0 }}
+              transition={{ duration: 1 }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Particle burst */}
+        <AnimatePresence>
+          {isRevealed && (
+            <>
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: color,
+                    left: "50%",
+                    top: "50%",
+                  }}
+                  initial={{ scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    scale: [0, 1, 0],
+                    x: Math.cos((i * 60 * Math.PI) / 180) * 40,
+                    y: Math.sin((i * 60 * Math.PI) / 180) * 40,
+                  }}
+                  exit={{ scale: 0 }}
+                  transition={{ duration: 1, delay: i * 0.1 }}
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Interaction hint */}
+      <motion.div
+        className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/50 flex items-center gap-1"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+      >
+        {type === "click" && "Click"}
+        {type === "drag" && "Drag"}
+        {type === "hover" && "Hover"}
+        <MousePointer2 className="w-3 h-3" />
+      </motion.div>
+
+      {/* Before/After tooltip */}
+      <AnimatePresence>
+        {isRevealed && (
+          <motion.div
+            className="absolute -top-16 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 whitespace-nowrap pointer-events-none"
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <p className="text-white text-xs font-medium">
+              {beforeState} → {afterState}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// Enhanced Skill Circle with Animated Border
+const AnimatedSkillCircle = ({
+  skill,
+  delay,
+  color,
+}: {
+  skill: { name: string; level: number; category: string }
+  delay: number
+  color: string
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <motion.div
+      className="relative group cursor-pointer"
+      initial={{ opacity: 0, scale: 0.8, y: 50 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.8, delay, type: "spring", stiffness: 100 }}
+      viewport={{ once: true }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ scale: 1.05, y: -5 }}
+    >
+      <div className="relative w-24 h-24 mx-auto">
+        {/* Breathing background layers */}
+        <motion.div
+          className="absolute inset-0 rounded-full opacity-10"
+          style={{ backgroundColor: color }}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.3, 0.1],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: delay * 0.5,
+          }}
+        />
+
+        <motion.div
+          className="absolute inset-2 rounded-full opacity-20"
+          style={{ backgroundColor: color }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: delay * 0.3,
+          }}
+        />
+
+        {/* Main skill circle */}
+        <div className="relative w-full h-full rounded-full bg-white/5 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden">
+          {/* Animated progress border */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90">
+            {/* Background circle */}
+            <circle cx="48" cy="48" r="44" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+
+            {/* Animated progress circle */}
+            <motion.circle
+              cx="48"
+              cy="48"
+              r="44"
+              fill="none"
+              stroke={color}
+              strokeWidth="4"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: skill.level / 100 }}
+              transition={{
+                duration: 2.5,
+                delay: delay + 0.5,
+                ease: "easeInOut",
+              }}
+              style={{
+                strokeDasharray: "276",
+                strokeDashoffset: "276",
+                filter: `drop-shadow(0 0 8px ${color})`,
+              }}
+              animate={{
+                filter: isHovered ? `drop-shadow(0 0 15px ${color})` : `drop-shadow(0 0 8px ${color})`,
+              }}
+            />
+
+            {/* Glowing dot at progress end */}
+            <motion.circle
+              cx={48 + 44 * Math.cos((skill.level / 100) * 2 * Math.PI - Math.PI / 2)}
+              cy={48 + 44 * Math.sin((skill.level / 100) * 2 * Math.PI - Math.PI / 2)}
+              r="3"
+              fill={color}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0.5, 1, 0.5],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                opacity: { duration: 2, repeat: Number.POSITIVE_INFINITY },
+                scale: { duration: 2, repeat: Number.POSITIVE_INFINITY },
+                delay: delay + 2.5,
+              }}
+              style={{
+                filter: `drop-shadow(0 0 6px ${color})`,
+              }}
+            />
+          </svg>
+
+          {/* Percentage display with breathing animation */}
+          <motion.div
+            className="relative z-10 text-center"
+            animate={{
+              scale: isHovered ? 1.1 : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.span
+              className="text-white text-sm font-bold block"
+              animate={{
+                textShadow: isHovered ? `0 0 15px ${color}` : `0 0 8px ${color}`,
+              }}
+            >
+              {skill.level}%
+            </motion.span>
+          </motion.div>
+
+          {/* Floating particles inside circle */}
+          <AnimatePresence>
+            {isHovered && (
+              <>
+                {[...Array(4)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full"
+                    style={{ backgroundColor: color }}
+                    initial={{
+                      opacity: 0,
+                      x: 48,
+                      y: 48,
+                    }}
+                    animate={{
+                      opacity: [0, 1, 0],
+                      x: 48 + (Math.random() - 0.5) * 60,
+                      y: 48 + (Math.random() - 0.5) * 60,
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 2,
+                      delay: i * 0.2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
+                  />
+                ))}
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Skill info */}
+        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-center">
+          <motion.h4
+            className="text-white font-bold text-sm mb-1"
+            animate={{
+              color: isHovered ? color : "white",
+            }}
+          >
+            {skill.name}
+          </motion.h4>
+          <p className="text-white/70 text-xs">{skill.category}</p>
+        </div>
+
+        {/* Enhanced tooltip on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              className="absolute -top-16 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 whitespace-nowrap pointer-events-none"
+              style={{ borderColor: `${color}40` }}
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="text-white text-sm font-medium">{skill.name}</p>
+              <p className="text-white/70 text-xs">{skill.category}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="text-xs" style={{ color: color }}>
+                  {skill.level}% Mastery
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  )
+}
 
 // Glass Morphism Card Component
 const GlassCard = ({
@@ -291,6 +687,9 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
         "Every transformation begins with understanding systems. I learned that complexity isn't the enemy—it's the raw material for breakthrough solutions.",
       insight: "Systems thinking became my lens for seeing patterns others missed.",
       icon: <Layers className="w-6 h-6" />,
+      beforeState: "Chaos",
+      afterState: "System",
+      interactionType: "click" as const,
     },
     {
       phase: "Discovery",
@@ -299,6 +698,9 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
         "Through countless user interviews and data deep-dives, I discovered that the most valuable insights hide in the spaces between what people say and what they actually do.",
       insight: "True innovation comes from translating unspoken needs into elegant solutions.",
       icon: <Eye className="w-6 h-6" />,
+      beforeState: "Hidden",
+      afterState: "Revealed",
+      interactionType: "hover" as const,
     },
     {
       phase: "Innovation",
@@ -307,6 +709,9 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
         "When conventional approaches hit walls, I learned to question the walls themselves. Some of my biggest breakthroughs came from asking 'What if we're solving the wrong problem?'",
       insight: "Constraints are often self-imposed. The real magic happens when you reframe the entire challenge.",
       icon: <Zap className="w-6 h-6" />,
+      beforeState: "Limited",
+      afterState: "Limitless",
+      interactionType: "drag" as const,
     },
     {
       phase: "Impact",
@@ -315,6 +720,9 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
         "Ideas without execution are just dreams. I mastered the art of turning insights into measurable business impact, learning that the best solutions feel inevitable in hindsight.",
       insight: "Sustainable transformation requires both vision and relentless execution discipline.",
       icon: <Target className="w-6 h-6" />,
+      beforeState: "Idea",
+      afterState: "Impact",
+      interactionType: "click" as const,
     },
     {
       phase: "Evolution",
@@ -323,6 +731,9 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
         "Today, I don't just solve current problems—I architect solutions for challenges that don't exist yet. The future belongs to those who can see around corners.",
       insight: "The most powerful transformations prepare organizations for futures they can't yet imagine.",
       icon: <Brain className="w-6 h-6" />,
+      beforeState: "Present",
+      afterState: "Future",
+      interactionType: "hover" as const,
     },
   ]
 
@@ -365,26 +776,27 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
             >
               <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
-                  {/* Phase Indicator */}
+                  {/* Interactive Phase Indicator */}
                   <div className="flex-shrink-0">
-                    <motion.div
-                      className="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center mb-4"
-                      style={{ backgroundColor: `${colors[realityMode]}20` }}
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div style={{ color: colors[realityMode] }}>{beat.icon}</div>
-                    </motion.div>
-                    <Badge
-                      className="text-xs font-bold"
-                      style={{
-                        backgroundColor: `${colors[realityMode]}20`,
-                        color: colors[realityMode],
-                        border: `1px solid ${colors[realityMode]}40`,
-                      }}
-                    >
-                      {beat.phase}
-                    </Badge>
+                    <InteractiveStoryIcon
+                      icon={beat.icon}
+                      beforeState={beat.beforeState}
+                      afterState={beat.afterState}
+                      color={colors[realityMode]}
+                      type={beat.interactionType}
+                    />
+                    <div className="mt-4">
+                      <Badge
+                        className="text-xs font-bold"
+                        style={{
+                          backgroundColor: `${colors[realityMode]}20`,
+                          color: colors[realityMode],
+                          border: `1px solid ${colors[realityMode]}40`,
+                        }}
+                      >
+                        {beat.phase}
+                      </Badge>
+                    </div>
                   </div>
 
                   {/* Story Content */}
@@ -420,8 +832,12 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
   )
 }
 
-// Journey Visualization
+// Journey Visualization with Mouse Tracking Glow
 const JourneyVisualization = ({ realityMode }: { realityMode: RealityMode }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const colors = {
     architect: "#00E5D3",
     innovator: "#FF6B9D",
@@ -437,55 +853,231 @@ const JourneyVisualization = ({ realityMode }: { realityMode: RealityMode }) => 
     { title: "Evolution", desc: "Future Vision", progress: 85 },
   ]
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      setMousePosition({
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100,
+      })
+    }
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovering(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovering(false)
+  }
+
+  // Calculate distance from mouse to each milestone
+  const getDistanceFromMouse = (index: number) => {
+    const milestoneX = (index / (milestones.length - 1)) * 100
+    const milestoneY = 50 // Center vertically
+    const distance = Math.sqrt(Math.pow(mousePosition.x - milestoneX, 2) + Math.pow(mousePosition.y - milestoneY, 2))
+    return Math.max(0, 30 - distance) / 30 // Normalize to 0-1, with 30% being max glow distance
+  }
+
   return (
-    <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        {milestones.map((milestone, index) => (
-          <motion.div
-            key={milestone.title}
-            className="text-center relative"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            viewport={{ once: true }}
-          >
-            {/* Progress Circle */}
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <svg className="w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
-                <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke={colors[realityMode]}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  whileInView={{ pathLength: milestone.progress / 100 }}
-                  transition={{ duration: 2, delay: index * 0.2 }}
+    <motion.div
+      className="relative rounded-2xl"
+      animate={{
+        boxShadow: isHovering
+          ? [
+              `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
+              `0 0 30px ${colors[realityMode]}30, 0 0 60px ${colors[realityMode]}15, inset 0 0 30px ${colors[realityMode]}08`,
+              `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
+            ]
+          : "0 0 0px transparent",
+        border: isHovering ? `1px solid ${colors[realityMode]}40` : `1px solid transparent`,
+      }}
+      transition={{
+        duration: 3,
+        repeat: isHovering ? Number.POSITIVE_INFINITY : 0,
+        ease: "easeInOut",
+      }}
+    >
+      <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
+        <div
+          ref={containerRef}
+          className="relative"
+          onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{ cursor: "none" }}
+        >
+          {/* Mouse Tracking Glow Effect */}
+          <AnimatePresence>
+            {isHovering && (
+              <motion.div
+                className="absolute pointer-events-none z-10"
+                style={{
+                  left: `${mousePosition.x}%`,
+                  top: `${mousePosition.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Main glow */}
+                <div
+                  className="w-32 h-32 rounded-full blur-xl opacity-60"
                   style={{
-                    strokeDasharray: "220",
-                    strokeDashoffset: "220",
+                    background: `radial-gradient(circle, ${colors[realityMode]}60, transparent 70%)`,
                   }}
                 />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">{milestone.progress}%</span>
-              </div>
-            </div>
-
-            <h4 className="text-white font-bold text-sm mb-1">{milestone.title}</h4>
-            <p className="text-white/70 text-xs">{milestone.desc}</p>
-
-            {/* Connection Line */}
-            {index < milestones.length - 1 && (
-              <div className="hidden md:block absolute top-10 left-full w-6 h-0.5 bg-white/20" />
+                {/* Inner glow */}
+                <div
+                  className="absolute inset-0 w-16 h-16 rounded-full blur-md opacity-80 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    background: `radial-gradient(circle, ${colors[realityMode]}80, transparent 60%)`,
+                  }}
+                />
+              </motion.div>
             )}
-          </motion.div>
-        ))}
-      </div>
-    </GlassCard>
+          </AnimatePresence>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-20">
+            {milestones.map((milestone, index) => {
+              const glowIntensity = isHovering ? getDistanceFromMouse(index) : 0
+
+              return (
+                <motion.div
+                  key={milestone.title}
+                  className="text-center relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  {/* Progress Circle with Dynamic Glow */}
+                  <div className="relative w-20 h-20 mx-auto mb-4">
+                    {/* Glowing border effect */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        boxShadow: `0 0 ${20 + glowIntensity * 30}px ${colors[realityMode]}${Math.floor(
+                          glowIntensity * 80,
+                        )
+                          .toString(16)
+                          .padStart(2, "0")}`,
+                        border: `2px solid ${colors[realityMode]}${Math.floor(20 + glowIntensity * 60)
+                          .toString(16)
+                          .padStart(2, "0")}`,
+                      }}
+                      animate={{
+                        scale: 1 + glowIntensity * 0.1,
+                      }}
+                      transition={{ duration: 0.2 }}
+                    />
+
+                    <svg className="w-full h-full -rotate-90 relative z-10">
+                      <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+                      <motion.circle
+                        cx="40"
+                        cy="40"
+                        r="35"
+                        fill="none"
+                        stroke={colors[realityMode]}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        whileInView={{ pathLength: milestone.progress / 100 }}
+                        transition={{ duration: 2, delay: index * 0.2 }}
+                        style={{
+                          strokeDasharray: "220",
+                          strokeDashoffset: "220",
+                          filter: `drop-shadow(0 0 ${8 + glowIntensity * 12}px ${colors[realityMode]})`,
+                        }}
+                        animate={{
+                          strokeWidth: 3 + glowIntensity * 2,
+                        }}
+                      />
+                    </svg>
+
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.span
+                        className="text-white text-sm font-bold"
+                        style={{
+                          textShadow: `0 0 ${8 + glowIntensity * 15}px ${colors[realityMode]}`,
+                        }}
+                        animate={{
+                          scale: 1 + glowIntensity * 0.1,
+                        }}
+                      >
+                        {milestone.progress}%
+                      </motion.span>
+                    </div>
+                  </div>
+
+                  <motion.h4
+                    className="text-white font-bold text-sm mb-1"
+                    style={{
+                      textShadow: glowIntensity > 0.3 ? `0 0 10px ${colors[realityMode]}` : "none",
+                    }}
+                    animate={{
+                      color: glowIntensity > 0.5 ? colors[realityMode] : "white",
+                    }}
+                  >
+                    {milestone.title}
+                  </motion.h4>
+                  <p className="text-white/70 text-xs">{milestone.desc}</p>
+
+                  {/* Connection Line with Glow */}
+                  {index < milestones.length - 1 && (
+                    <motion.div
+                      className="hidden md:block absolute top-10 left-full w-6 h-0.5 bg-white/20"
+                      style={{
+                        boxShadow: glowIntensity > 0.2 ? `0 0 8px ${colors[realityMode]}` : "none",
+                        backgroundColor: glowIntensity > 0.3 ? `${colors[realityMode]}60` : "rgba(255,255,255,0.2)",
+                      }}
+                      animate={{
+                        height: glowIntensity > 0.4 ? "3px" : "2px",
+                      }}
+                    />
+                  )}
+
+                  {/* Proximity Particles */}
+                  <AnimatePresence>
+                    {glowIntensity > 0.6 && (
+                      <>
+                        {[...Array(3)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute w-1 h-1 rounded-full pointer-events-none"
+                            style={{
+                              backgroundColor: colors[realityMode],
+                              left: "50%",
+                              top: "50%",
+                            }}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{
+                              opacity: [0, 1, 0],
+                              scale: [0, 1, 0],
+                              x: (Math.random() - 0.5) * 60,
+                              y: (Math.random() - 0.5) * 60,
+                            }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                              duration: 2,
+                              delay: i * 0.3,
+                              repeat: Number.POSITIVE_INFINITY,
+                            }}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
   )
 }
 
@@ -508,49 +1100,9 @@ const SkillsGrid = ({ realityMode }: { realityMode: RealityMode }) => {
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
       {skills.map((skill, index) => (
-        <motion.div
-          key={skill.name}
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: index * 0.1 }}
-          viewport={{ once: true }}
-        >
-          <GlassCard className="p-6 text-center relative overflow-hidden" intensity="light">
-            <ProofParticles achievement={`${skill.level}%`} color={colors[realityMode]} />
-
-            <div className="relative z-10">
-              <div className="w-16 h-16 mx-auto mb-4 relative">
-                <svg className="w-full h-full -rotate-90">
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
-                  <motion.circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    fill="none"
-                    stroke={colors[realityMode]}
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: skill.level / 100 }}
-                    transition={{ duration: 2, delay: index * 0.1 }}
-                    style={{
-                      strokeDasharray: "176",
-                      strokeDashoffset: "176",
-                    }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">{skill.level}%</span>
-                </div>
-              </div>
-
-              <h4 className="text-white font-bold text-sm mb-1">{skill.name}</h4>
-              <p className="text-white/70 text-xs">{skill.category}</p>
-            </div>
-          </GlassCard>
-        </motion.div>
+        <AnimatedSkillCircle key={skill.name} skill={skill} delay={index * 0.15} color={colors[realityMode]} />
       ))}
     </div>
   )
@@ -732,12 +1284,20 @@ export default function ArpanPortfolio() {
       className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800"
       style={{ cursor: "none" }}
     >
-      {/* Subtle Background Pattern */}
-      <div
+      {/* Animated Background Pattern */}
+      <motion.div
         className="fixed inset-0 opacity-5"
         style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, ${colors[realityMode]} 2px, transparent 2px)`,
           backgroundSize: "50px 50px",
+        }}
+        animate={{
+          backgroundPosition: ["0% 0%", "100% 100%"],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "linear",
         }}
       />
 
