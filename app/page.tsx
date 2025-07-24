@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import type React from "react"
+import React from "react"
 
 import { motion, AnimatePresence, useScroll } from "framer-motion"
 import {
@@ -40,20 +40,427 @@ const BreathingBackground = ({ color }: { color: string }) => {
   )
 }
 
-// Interactive Story Icon Component
+// Enhanced Custom SVG Components for Interactive Story Icons
+const SystemMechanism = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
+  <motion.svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Central gear */}
+    <motion.g
+      animate={{ rotate: isRevealed ? 360 : 0 }}
+      transition={{ duration: 3, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
+      style={{ transformOrigin: "50px 50px" }}
+    >
+      <circle cx="50" cy="50" r="15" stroke={color} strokeWidth="3" fill="none" />
+      {[...Array(8)].map((_, i) => (
+        <line
+          key={i}
+          x1="50"
+          y1="35"
+          x2="50"
+          y2="30"
+          stroke={color}
+          strokeWidth="3"
+          strokeLinecap="round"
+          transform={`rotate(${i * 45}, 50, 50)`}
+        />
+      ))}
+    </motion.g>
+
+    {/* Connected smaller gears */}
+    <motion.g
+      animate={{ rotate: isRevealed ? -360 : 0 }}
+      transition={{ duration: 2, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
+      style={{ transformOrigin: "25px 25px" }}
+    >
+      <circle cx="25" cy="25" r="8" stroke={color} strokeWidth="2" fill="none" />
+      {[...Array(6)].map((_, i) => (
+        <line
+          key={i}
+          x1="25"
+          y1="17"
+          x2="25"
+          y2="14"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          transform={`rotate(${i * 60}, 25, 25)`}
+        />
+      ))}
+    </motion.g>
+
+    <motion.g
+      animate={{ rotate: isRevealed ? -360 : 0 }}
+      transition={{ duration: 2.5, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
+      style={{ transformOrigin: "75px 75px" }}
+    >
+      <circle cx="75" cy="75" r="8" stroke={color} strokeWidth="2" fill="none" />
+      {[...Array(6)].map((_, i) => (
+        <line
+          key={i}
+          x1="75"
+          y1="67"
+          x2="75"
+          y2="64"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          transform={`rotate(${i * 60}, 75, 75)`}
+        />
+      ))}
+    </motion.g>
+
+    {/* Connection lines */}
+    <motion.line
+      x1="35"
+      y1="35"
+      x2="42"
+      y2="42"
+      stroke={color}
+      strokeWidth="2"
+      initial={{ opacity: 0.3 }}
+      animate={{ opacity: isRevealed ? [0.3, 1, 0.3] : 0.3 }}
+      transition={{ duration: 1, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0 }}
+    />
+    <motion.line
+      x1="65"
+      y1="65"
+      x2="58"
+      y2="58"
+      stroke={color}
+      strokeWidth="2"
+      initial={{ opacity: 0.3 }}
+      animate={{ opacity: isRevealed ? [0.3, 1, 0.3] : 0.3 }}
+      transition={{ duration: 1, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, delay: 0.5 }}
+    />
+  </motion.svg>
+)
+
+const PuzzleSolver = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
+  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Puzzle pieces that come together */}
+    <motion.path
+      d="M20 30 L45 30 L45 55 L20 55 Z"
+      stroke={color}
+      strokeWidth="3"
+      fill="none"
+      initial={{ x: -10, opacity: 0.5 }}
+      animate={{ x: isRevealed ? 0 : -10, opacity: isRevealed ? 1 : 0.5 }}
+      transition={{ duration: 0.8 }}
+    />
+    <motion.path
+      d="M55 30 L80 30 L80 55 L55 55 Z"
+      stroke={color}
+      strokeWidth="3"
+      fill="none"
+      initial={{ x: 10, opacity: 0.5 }}
+      animate={{ x: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
+      transition={{ duration: 0.8 }}
+    />
+    <motion.path
+      d="M20 65 L45 65 L45 90 L20 90 Z"
+      stroke={color}
+      strokeWidth="3"
+      fill="none"
+      initial={{ y: 10, opacity: 0.5 }}
+      animate={{ y: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+    />
+    <motion.path
+      d="M55 65 L80 65 L80 90 L55 90 Z"
+      stroke={color}
+      strokeWidth="3"
+      fill="none"
+      initial={{ x: 10, y: 10, opacity: 0.5 }}
+      animate={{ x: isRevealed ? 0 : 10, y: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
+      transition={{ duration: 0.8, delay: 0.4 }}
+    />
+
+    {/* Connection points that light up */}
+    {isRevealed && (
+      <>
+        <motion.circle
+          cx="45"
+          cy="42.5"
+          r="3"
+          fill={color}
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        />
+        <motion.circle
+          cx="42.5"
+          cy="65"
+          r="3"
+          fill={color}
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
+          transition={{ duration: 0.5, delay: 1 }}
+        />
+        <motion.circle
+          cx="57.5"
+          cy="65"
+          r="3"
+          fill={color}
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
+          transition={{ duration: 0.5, delay: 1.2 }}
+        />
+      </>
+    )}
+  </svg>
+)
+
+const BarrierBreaker = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
+  <motion.svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Wall bricks that crumble */}
+    {[...Array(12)].map((_, i) => {
+      const row = Math.floor(i / 4)
+      const col = i % 4
+      const x = 20 + col * 15 + (row % 2) * 7.5
+      const y = 30 + row * 12
+
+      return (
+        <motion.rect
+          key={i}
+          x={x}
+          y={y}
+          width="12"
+          height="8"
+          stroke={color}
+          strokeWidth="2"
+          fill="none"
+          initial={{ opacity: 1, scale: 1 }}
+          animate={
+            isRevealed
+              ? {
+                  opacity: [1, 0.5, 0],
+                  scale: [1, 0.8, 0.3],
+                  x: x + (Math.random() - 0.5) * 30,
+                  y: y + (Math.random() - 0.5) * 20,
+                  rotate: (Math.random() - 0.5) * 180,
+                }
+              : {}
+          }
+          transition={{ duration: 1.5, delay: i * 0.1 }}
+        />
+      )
+    })}
+
+    {/* Energy burst effect */}
+    {isRevealed && (
+      <>
+        {[...Array(8)].map((_, i) => (
+          <motion.line
+            key={i}
+            x1="50"
+            y1="50"
+            x2={50 + Math.cos((i * 45 * Math.PI) / 180) * 25}
+            y2={50 + Math.sin((i * 45 * Math.PI) / 180) * 25}
+            stroke={color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          />
+        ))}
+      </>
+    )}
+  </motion.svg>
+)
+
+const ValueGrowth = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
+  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Growing bars with value indicators */}
+    <motion.rect
+      x="15"
+      y={isRevealed ? 50 : 80}
+      width="12"
+      height={isRevealed ? 30 : 0}
+      fill={color}
+      transition={{ duration: 0.6 }}
+    />
+    <motion.rect
+      x="35"
+      y={isRevealed ? 35 : 80}
+      width="12"
+      height={isRevealed ? 45 : 0}
+      fill={color}
+      transition={{ duration: 0.6, delay: 0.2 }}
+    />
+    <motion.rect
+      x="55"
+      y={isRevealed ? 25 : 80}
+      width="12"
+      height={isRevealed ? 55 : 0}
+      fill={color}
+      transition={{ duration: 0.6, delay: 0.4 }}
+    />
+    <motion.rect
+      x="75"
+      y={isRevealed ? 15 : 80}
+      width="12"
+      height={isRevealed ? 65 : 0}
+      fill={color}
+      transition={{ duration: 0.6, delay: 0.6 }}
+    />
+
+    {/* Upward arrow */}
+    {isRevealed && (
+      <motion.path
+        d="M50 20 L45 30 L55 30 Z"
+        fill={color}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1 }}
+      />
+    )}
+
+    {/* Value sparkles */}
+    {isRevealed && (
+      <>
+        {[...Array(6)].map((_, i) => (
+          <motion.circle
+            key={i}
+            cx={20 + i * 12}
+            cy={70 - i * 8}
+            r="2"
+            fill={color}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: [0, 1.5, 1],
+              opacity: [0, 1, 0.7],
+              y: [0, -5, 0],
+            }}
+            transition={{
+              duration: 1,
+              delay: 0.8 + i * 0.1,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatDelay: 2,
+            }}
+          />
+        ))}
+      </>
+    )}
+  </svg>
+)
+
+const FutureNetwork = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
+  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Network nodes that appear and connect */}
+    {[
+      { x: 50, y: 20 },
+      { x: 20, y: 40 },
+      { x: 80, y: 40 },
+      { x: 35, y: 70 },
+      { x: 65, y: 70 },
+      { x: 50, y: 85 },
+    ].map((node, i) => (
+      <motion.circle
+        key={i}
+        cx={node.x}
+        cy={node.y}
+        r="4"
+        fill={color}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={
+          isRevealed
+            ? {
+                scale: [0, 1.3, 1],
+                opacity: 1,
+              }
+            : { scale: 0, opacity: 0 }
+        }
+        transition={{ duration: 0.5, delay: i * 0.1 }}
+      />
+    ))}
+
+    {/* Connecting lines that pulse */}
+    {[
+      { from: { x: 50, y: 20 }, to: { x: 20, y: 40 } },
+      { from: { x: 50, y: 20 }, to: { x: 80, y: 40 } },
+      { from: { x: 20, y: 40 }, to: { x: 35, y: 70 } },
+      { from: { x: 80, y: 40 }, to: { x: 65, y: 70 } },
+      { from: { x: 35, y: 70 }, to: { x: 50, y: 85 } },
+      { from: { x: 65, y: 70 }, to: { x: 50, y: 85 } },
+      { from: { x: 35, y: 70 }, to: { x: 65, y: 70 } },
+    ].map((connection, i) => (
+      <motion.line
+        key={i}
+        x1={connection.from.x}
+        y1={connection.from.y}
+        x2={connection.to.x}
+        y2={connection.to.y}
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={
+          isRevealed
+            ? {
+                pathLength: 1,
+                opacity: [0, 0.8, 0.4, 0.8],
+              }
+            : { pathLength: 0, opacity: 0 }
+        }
+        transition={{
+          pathLength: { duration: 0.8, delay: 0.6 + i * 0.1 },
+          opacity: {
+            duration: 2,
+            delay: 1.4,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatDelay: 0.5,
+          },
+        }}
+      />
+    ))}
+
+    {/* Data flow particles */}
+    {isRevealed && (
+      <>
+        {[...Array(3)].map((_, i) => (
+          <motion.circle
+            key={i}
+            cx="50"
+            cy="20"
+            r="1.5"
+            fill={color}
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 1, 0],
+              x: [0, -30, -15],
+              y: [0, 20, 50],
+            }}
+            transition={{
+              duration: 2,
+              delay: 2 + i * 0.7,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatDelay: 1,
+            }}
+          />
+        ))}
+      </>
+    )}
+  </svg>
+)
+
+// Enhanced Interactive Story Icon Component
+interface InteractiveStoryIconProps {
+  icon: React.ReactNode
+  beforeState: string
+  revealedContent: React.ReactNode
+  color: string
+  type?: "click" | "drag" | "hover"
+  title: string
+}
+
 const InteractiveStoryIcon = ({
   icon,
   beforeState,
-  afterState,
+  revealedContent,
   color,
   type = "click",
-}: {
-  icon: React.ReactNode
-  beforeState: string
-  afterState: string
-  color: string
-  type?: "click" | "drag" | "hover"
-}) => {
+  title,
+}: InteractiveStoryIconProps) => {
   const [isRevealed, setIsRevealed] = useState(false)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -68,7 +475,7 @@ const InteractiveStoryIcon = ({
     if (type === "drag") {
       setDragPosition({ x: info.offset.x, y: info.offset.y })
       const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2)
-      setIsRevealed(distance > 30)
+      setIsRevealed(distance > 20)
     }
   }
 
@@ -76,15 +483,15 @@ const InteractiveStoryIcon = ({
     if (type === "drag") {
       setIsDragging(false)
       setDragPosition({ x: 0, y: 0 })
-      setTimeout(() => setIsRevealed(false), 2000)
+      setTimeout(() => setIsRevealed(false), 3000)
     }
   }
 
   return (
     <div className="relative">
       <motion.div
-        className="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer"
-        style={{ backgroundColor: `${color}20` }}
+        className="w-20 h-20 rounded-full border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer"
+        style={{ backgroundColor: `${color}15` }}
         onClick={() => type === "click" && setIsRevealed(!isRevealed)}
         onHoverStart={() => type === "hover" && setIsRevealed(true)}
         onHoverEnd={() => type === "hover" && setIsRevealed(false)}
@@ -92,16 +499,17 @@ const InteractiveStoryIcon = ({
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
-        dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
-        whileHover={{ scale: 1.1 }}
+        dragConstraints={{ left: -40, right: 40, top: -40, bottom: 40 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        whileDrag={{ scale: 1.2, rotate: 5 }}
+        whileDrag={{ scale: 1.1, rotate: 2 }}
         animate={{
           x: dragPosition.x,
           y: dragPosition.y,
-          boxShadow: isRevealed ? `0 0 30px ${color}60` : `0 0 10px ${color}20`,
+          boxShadow: isRevealed ? `0 0 25px ${color}40, 0 0 50px ${color}20` : `0 0 10px ${color}20`,
+          borderColor: isRevealed ? `${color}60` : "rgba(255,255,255,0.3)",
         }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
       >
         {/* Breathing background */}
         <BreathingBackground color={color} />
@@ -112,49 +520,61 @@ const InteractiveStoryIcon = ({
           style={{ color: color }}
           animate={{
             opacity: isRevealed ? 0 : 1,
-            scale: isRevealed ? 0.8 : 1,
-            rotateY: isRevealed ? 180 : 0,
+            scale: isRevealed ? 0.7 : 1,
+            rotateY: isRevealed ? 90 : 0,
           }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
           {icon}
         </motion.div>
 
         {/* After state */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs"
+          className="absolute inset-0 flex items-center justify-center"
           animate={{
             opacity: isRevealed ? 1 : 0,
-            scale: isRevealed ? 1 : 0.8,
-            rotateY: isRevealed ? 0 : -180,
+            scale: isRevealed ? 1 : 0.7,
+            rotateY: isRevealed ? 0 : -90,
           }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
-          ✨
+          {React.isValidElement(revealedContent)
+            ? React.cloneElement(revealedContent as React.ReactElement, { isRevealed, color })
+            : revealedContent}
         </motion.div>
 
-        {/* Ripple effect on interaction */}
-        <AnimatePresence>
-          {isRevealed && (
-            <motion.div
-              className="absolute inset-0 rounded-full border-2"
-              style={{ borderColor: color }}
-              initial={{ scale: 1, opacity: 0.8 }}
-              animate={{ scale: 2, opacity: 0 }}
-              exit={{ scale: 1, opacity: 0 }}
-              transition={{ duration: 1 }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Particle burst */}
+        {/* Enhanced ripple effect */}
         <AnimatePresence>
           {isRevealed && (
             <>
-              {[...Array(6)].map((_, i) => (
+              <motion.div
+                className="absolute inset-0 rounded-full border-2"
+                style={{ borderColor: `${color}60` }}
+                initial={{ scale: 1, opacity: 0.8 }}
+                animate={{ scale: 2.5, opacity: 0 }}
+                exit={{ scale: 1, opacity: 0 }}
+                transition={{ duration: 1.2 }}
+              />
+              <motion.div
+                className="absolute inset-0 rounded-full border"
+                style={{ borderColor: `${color}40` }}
+                initial={{ scale: 1, opacity: 0.6 }}
+                animate={{ scale: 3.5, opacity: 0 }}
+                exit={{ scale: 1, opacity: 0 }}
+                transition={{ duration: 1.5, delay: 0.2 }}
+              />
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Enhanced particle burst */}
+        <AnimatePresence>
+          {isRevealed && (
+            <>
+              {[...Array(8)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className="absolute w-1 h-1 rounded-full"
+                  className="absolute w-1.5 h-1.5 rounded-full"
                   style={{
                     backgroundColor: color,
                     left: "50%",
@@ -162,12 +582,12 @@ const InteractiveStoryIcon = ({
                   }}
                   initial={{ scale: 0, x: 0, y: 0 }}
                   animate={{
-                    scale: [0, 1, 0],
-                    x: Math.cos((i * 60 * Math.PI) / 180) * 40,
-                    y: Math.sin((i * 60 * Math.PI) / 180) * 40,
+                    scale: [0, 1.2, 0],
+                    x: Math.cos((i * 45 * Math.PI) / 180) * 50,
+                    y: Math.sin((i * 45 * Math.PI) / 180) * 50,
                   }}
                   exit={{ scale: 0 }}
-                  transition={{ duration: 1, delay: i * 0.1 }}
+                  transition={{ duration: 1.2, delay: i * 0.05 }}
                 />
               ))}
             </>
@@ -177,28 +597,33 @@ const InteractiveStoryIcon = ({
 
       {/* Interaction hint */}
       <motion.div
-        className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/50 flex items-center gap-1"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+        className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-xs text-white/60 flex items-center gap-1"
+        animate={{ opacity: [0.4, 0.8, 0.4] }}
+        transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY }}
       >
-        {type === "click" && "Click"}
-        {type === "drag" && "Drag"}
-        {type === "hover" && "Hover"}
+        {type === "click" && "Click to activate"}
+        {type === "drag" && "Drag to solve"}
+        {type === "hover" && "Hover to explore"}
         <MousePointer2 className="w-3 h-3" />
       </motion.div>
 
-      {/* Before/After tooltip */}
+      {/* Enhanced status tooltip */}
       <AnimatePresence>
         {isRevealed && (
           <motion.div
-            className="absolute -top-16 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 whitespace-nowrap pointer-events-none"
+            className="absolute -top-20 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md border rounded-xl px-4 py-2 whitespace-nowrap pointer-events-none z-50"
+            style={{
+              borderColor: `${color}40`,
+              boxShadow: `0 0 20px ${color}20`,
+            }}
             initial={{ opacity: 0, y: 10, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.8 }}
             transition={{ duration: 0.3 }}
           >
-            <p className="text-white text-xs font-medium">
-              {beforeState} → {afterState}
+            <p className="text-white text-sm font-medium">{title}</p>
+            <p className="text-xs" style={{ color: color }}>
+              {beforeState} → Activated
             </p>
           </motion.div>
         )}
@@ -688,7 +1113,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       insight: "Systems thinking became my lens for seeing patterns others missed.",
       icon: <Layers className="w-6 h-6" />,
       beforeState: "Chaos",
-      afterState: "System",
+      revealedContent: <SystemMechanism isRevealed={false} color={""} />,
       interactionType: "click" as const,
     },
     {
@@ -699,8 +1124,8 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       insight: "True innovation comes from translating unspoken needs into elegant solutions.",
       icon: <Eye className="w-6 h-6" />,
       beforeState: "Hidden",
-      afterState: "Revealed",
-      interactionType: "hover" as const,
+      revealedContent: <PuzzleSolver isRevealed={false} color={""} />,
+      interactionType: "drag" as const,
     },
     {
       phase: "Innovation",
@@ -710,7 +1135,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       insight: "Constraints are often self-imposed. The real magic happens when you reframe the entire challenge.",
       icon: <Zap className="w-6 h-6" />,
       beforeState: "Limited",
-      afterState: "Limitless",
+      revealedContent: <BarrierBreaker isRevealed={false} color={""} />,
       interactionType: "drag" as const,
     },
     {
@@ -721,7 +1146,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       insight: "Sustainable transformation requires both vision and relentless execution discipline.",
       icon: <Target className="w-6 h-6" />,
       beforeState: "Idea",
-      afterState: "Impact",
+      revealedContent: <ValueGrowth isRevealed={false} color={""} />,
       interactionType: "click" as const,
     },
     {
@@ -732,7 +1157,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       insight: "The most powerful transformations prepare organizations for futures they can't yet imagine.",
       icon: <Brain className="w-6 h-6" />,
       beforeState: "Present",
-      afterState: "Future",
+      revealedContent: <FutureNetwork isRevealed={false} color={""} />,
       interactionType: "hover" as const,
     },
   ]
@@ -781,9 +1206,10 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
                     <InteractiveStoryIcon
                       icon={beat.icon}
                       beforeState={beat.beforeState}
-                      afterState={beat.afterState}
+                      revealedContent={beat.revealedContent}
                       color={colors[realityMode]}
                       type={beat.interactionType}
+                      title={beat.title}
                     />
                     <div className="mt-4">
                       <Badge
@@ -886,11 +1312,11 @@ const JourneyVisualization = ({ realityMode }: { realityMode: RealityMode }) => 
         isHovering
           ? {
               boxShadow: [
-                `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
-                `0 0 30px ${colors[realityMode]}30, 0 0 60px ${colors[realityMode]}15, inset 0 0 30px ${colors[realityMode]}08`,
-                `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
+                `0 0 20px ${colors[realityMode]}15, 0 0 40px ${colors[realityMode]}08, inset 0 0 20px ${colors[realityMode]}03`,
+                `0 0 25px ${colors[realityMode]}20, 0 0 50px ${colors[realityMode]}12, inset 0 0 25px ${colors[realityMode]}05`,
+                `0 0 20px ${colors[realityMode]}15, 0 0 40px ${colors[realityMode]}08, inset 0 0 20px ${colors[realityMode]}03`,
               ],
-              border: `1px solid ${colors[realityMode]}40`,
+              border: `1px solid ${colors[realityMode]}30`,
             }
           : {
               boxShadow: "0 0 0px transparent",
@@ -899,14 +1325,14 @@ const JourneyVisualization = ({ realityMode }: { realityMode: RealityMode }) => 
       }
       transition={{
         boxShadow: {
-          duration: isHovering ? 0.8 : 0.6,
+          duration: isHovering ? 3.5 : 1.2,
           repeat: isHovering ? Number.POSITIVE_INFINITY : 0,
-          ease: "easeInOut",
-          repeatDelay: isHovering ? 0 : undefined,
+          ease: [0.25, 0.1, 0.25, 1],
+          repeatDelay: 0.5,
         },
         border: {
-          duration: isHovering ? 0.8 : 0.6,
-          ease: "easeInOut",
+          duration: isHovering ? 1.5 : 1.2,
+          ease: [0.25, 0.1, 0.25, 1],
         },
       }}
     >
@@ -1125,6 +1551,7 @@ export default function ArpanPortfolio() {
   const [realityMode, setRealityMode] = useState<RealityMode>("architect")
   const [timelineCategory, setTimelineCategory] = useState<RealityMode>("architect")
   const [showTimelineControls, setShowTimelineControls] = useState(false)
+  const [isJourneyHovering, setIsJourneyHovering] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -1305,11 +1732,18 @@ export default function ArpanPortfolio() {
         }}
         animate={{
           backgroundPosition: ["0% 0%", "100% 100%"],
+          opacity: isJourneyHovering ? 0.02 : 0.05,
         }}
         transition={{
-          duration: 20,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "linear",
+          backgroundPosition: {
+            duration: 25,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          },
+          opacity: {
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1],
+          },
         }}
       />
 
@@ -1436,7 +1870,12 @@ export default function ArpanPortfolio() {
       </section>
 
       {/* Journey Section */}
-      <section id="journey" className="py-20">
+      <section
+        id="journey"
+        className="py-20"
+        onMouseEnter={() => setIsJourneyHovering(true)}
+        onMouseLeave={() => setIsJourneyHovering(false)}
+      >
         <div className="max-w-6xl mx-auto px-8">
           <motion.div
             className="text-center mb-16"
