@@ -1,647 +1,205 @@
 "use client"
-
-import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import type React from "react"
+
+import { motion, AnimatePresence, useScroll } from "framer-motion"
 import {
-  Sparkles,
+  Linkedin,
+  Brain,
   Zap,
-  Rocket,
-  Target,
-  Crown,
+  Layers,
+  Sparkles,
   ArrowRight,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Coffee,
-  Code,
-  Palette,
-  TrendingUp,
-  Users,
-  Award,
-  Heart,
-  CloudLightningIcon as Lightning,
-  Gem,
-  MagnetIcon as Magic,
+  Mail,
+  Eye,
+  Target,
+  ChevronDown,
+  MousePointer2,
 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
-export default function ArpanPortfolio() {
-  const [currentScene, setCurrentScene] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [cursorVariant, setCursorVariant] = useState("default")
-  const [secretUnlocked, setSecretUnlocked] = useState(false)
-  const [konami, setKonami] = useState([])
-  const containerRef = useRef<HTMLDivElement>(null)
+// Reality Modes
+type RealityMode = "architect" | "innovator" | "transformer" | "visionary"
 
-  const { scrollYProgress } = useScroll()
-  const sceneProgress = useTransform(scrollYProgress, [0, 1], [0, 5])
+// Breathing Background Animation
+const BreathingBackground = ({ color }: { color: string }) => {
+  return (
+    <motion.div
+      className="absolute inset-0 rounded-full opacity-20"
+      style={{ backgroundColor: color }}
+      animate={{
+        scale: [1, 1.1, 1],
+        opacity: [0.1, 0.3, 0.1],
+      }}
+      transition={{
+        duration: 4,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      }}
+    />
+  )
+}
 
-  // Custom cursor
-  const cursorX = useMotionValue(-100)
-  const cursorY = useMotionValue(-100)
-  const springConfig = { damping: 25, stiffness: 700 }
-  const cursorXSpring = useSpring(cursorX, springConfig)
-  const cursorYSpring = useSpring(cursorY, springConfig)
+// Interactive Story Icon Component
+const InteractiveStoryIcon = ({
+  icon,
+  beforeState,
+  afterState,
+  color,
+  type = "click",
+}: {
+  icon: React.ReactNode
+  beforeState: string
+  afterState: string
+  color: string
+  type?: "click" | "drag" | "hover"
+}) => {
+  const [isRevealed, setIsRevealed] = useState(false)
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
 
-  useEffect(() => {
-    const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX - 16)
-      cursorY.set(e.clientY - 16)
-      setMousePosition({ x: e.clientX, y: e.clientY })
+  const handleDragStart = () => {
+    if (type === "drag") {
+      setIsDragging(true)
     }
-    window.addEventListener("mousemove", moveCursor)
-    return () => window.removeEventListener("mousemove", moveCursor)
-  }, [cursorX, cursorY])
+  }
 
-  useEffect(() => {
-    const unsubscribe = sceneProgress.onChange((latest) => {
-      setCurrentScene(Math.floor(latest))
-    })
-    return () => unsubscribe()
-  }, [sceneProgress])
-
-  // Konami code for secret
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const konamiCode = [
-        "ArrowUp",
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyB",
-        "KeyA",
-      ]
-      const newKonami = [...konami, e.code].slice(-10)
-      setKonami(newKonami)
-
-      if (JSON.stringify(newKonami) === JSON.stringify(konamiCode)) {
-        setSecretUnlocked(true)
-        setKonami([])
-      }
+  const handleDrag = (event: any, info: any) => {
+    if (type === "drag") {
+      setDragPosition({ x: info.offset.x, y: info.offset.y })
+      const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2)
+      setIsRevealed(distance > 30)
     }
-    window.addEventListener("keydown", handleKeyPress)
-    return () => window.removeEventListener("keydown", handleKeyPress)
-  }, [konami])
+  }
 
-  const scenes = [
-    { id: "intro", title: "The Problem Solver", color: "#ff6b6b" },
-    { id: "skills", title: "The Skill Arsenal", color: "#4ecdc4" },
-    { id: "projects", title: "The Magic Happens", color: "#45b7d1" },
-    { id: "impact", title: "The Results Speak", color: "#f9ca24" },
-    { id: "future", title: "Your Next Level", color: "#6c5ce7" },
-  ]
+  const handleDragEnd = () => {
+    if (type === "drag") {
+      setIsDragging(false)
+      setDragPosition({ x: 0, y: 0 })
+      setTimeout(() => setIsRevealed(false), 2000)
+    }
+  }
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-hidden cursor-none">
-      {/* Custom Cursor */}
+    <div className="relative">
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-50 mix-blend-difference"
-        style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
+        className="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer"
+        style={{ backgroundColor: `${color}20` }}
+        onClick={() => type === "click" && setIsRevealed(!isRevealed)}
+        onHoverStart={() => type === "hover" && setIsRevealed(true)}
+        onHoverEnd={() => type === "hover" && setIsRevealed(false)}
+        drag={type === "drag"}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        whileDrag={{ scale: 1.2, rotate: 5 }}
+        animate={{
+          x: dragPosition.x,
+          y: dragPosition.y,
+          boxShadow: isRevealed ? `0 0 30px ${color}60` : `0 0 10px ${color}20`,
         }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
       >
+        {/* Breathing background */}
+        <BreathingBackground color={color} />
+
+        {/* Before state */}
         <motion.div
-          className={`w-full h-full rounded-full border-2 border-white ${
-            cursorVariant === "hover"
-              ? "scale-150 bg-white/20"
-              : cursorVariant === "click"
-                ? "scale-75 bg-white/40"
-                : ""
-          }`}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ color: color }}
           animate={{
-            scale: cursorVariant === "hover" ? 1.5 : cursorVariant === "click" ? 0.75 : 1,
-            backgroundColor: cursorVariant === "hover" ? "rgba(255,255,255,0.2)" : "transparent",
+            opacity: isRevealed ? 0 : 1,
+            scale: isRevealed ? 0.8 : 1,
+            rotateY: isRevealed ? 180 : 0,
           }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
-        />
+          transition={{ duration: 0.5 }}
+        >
+          {icon}
+        </motion.div>
+
+        {/* After state */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs"
+          animate={{
+            opacity: isRevealed ? 1 : 0,
+            scale: isRevealed ? 1 : 0.8,
+            rotateY: isRevealed ? 0 : -180,
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          ✨
+        </motion.div>
+
+        {/* Ripple effect on interaction */}
+        <AnimatePresence>
+          {isRevealed && (
+            <motion.div
+              className="absolute inset-0 rounded-full border-2"
+              style={{ borderColor: color }}
+              initial={{ scale: 1, opacity: 0.8 }}
+              animate={{ scale: 2, opacity: 0 }}
+              exit={{ scale: 1, opacity: 0 }}
+              transition={{ duration: 1 }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Particle burst */}
+        <AnimatePresence>
+          {isRevealed && (
+            <>
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: color,
+                    left: "50%",
+                    top: "50%",
+                  }}
+                  initial={{ scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    scale: [0, 1, 0],
+                    x: Math.cos((i * 60 * Math.PI) / 180) * 40,
+                    y: Math.sin((i * 60 * Math.PI) / 180) * 40,
+                  }}
+                  exit={{ scale: 0 }}
+                  transition={{ duration: 1, delay: i * 0.1 }}
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
       </motion.div>
 
-      {/* Floating Particles */}
-      <FloatingParticles />
+      {/* Interaction hint */}
+      <motion.div
+        className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/50 flex items-center gap-1"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+      >
+        {type === "click" && "Click"}
+        {type === "drag" && "Drag"}
+        {type === "hover" && "Hover"}
+        <MousePointer2 className="w-3 h-3" />
+      </motion.div>
 
-      {/* Scene Navigation */}
-      <div className="fixed top-8 right-8 z-40 flex gap-2">
-        {scenes.map((scene, index) => (
-          <motion.button
-            key={scene.id}
-            className={`w-3 h-3 rounded-full border-2 border-white/30 ${
-              currentScene === index ? "bg-white" : "bg-transparent"
-            }`}
-            onClick={() => {
-              const element = document.getElementById(scene.id)
-              element?.scrollIntoView({ behavior: "smooth" })
-            }}
-            onMouseEnter={() => setCursorVariant("hover")}
-            onMouseLeave={() => setCursorVariant("default")}
-            whileHover={{ scale: 1.5 }}
-            whileTap={{ scale: 0.8 }}
-          />
-        ))}
-      </div>
-
-      {/* Audio Controls */}
-      <div className="fixed top-8 left-8 z-40 flex gap-4">
-        <motion.button
-          className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-          onClick={() => setIsPlaying(!isPlaying)}
-          onMouseEnter={() => setCursorVariant("hover")}
-          onMouseLeave={() => setCursorVariant("default")}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-        </motion.button>
-        <motion.button
-          className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          onMouseEnter={() => setCursorVariant("hover")}
-          onMouseLeave={() => setCursorVariant("default")}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-        </motion.button>
-      </div>
-
-      {/* Scene 1: The Problem Solver */}
-      <section id="intro" className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-black to-purple-900/20" />
-
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-red-400 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                scale: [0, 1, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 2 + Math.random() * 3,
-                repeat: Number.POSITIVE_INFINITY,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="max-w-6xl mx-auto px-8 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-          >
-            <motion.h1
-              className="text-8xl md:text-9xl font-black mb-8 leading-none"
-              onMouseEnter={() => setCursorVariant("hover")}
-              onMouseLeave={() => setCursorVariant("default")}
-            >
-              <span className="bg-gradient-to-r from-red-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-                ARPAN
-              </span>
-              <br />
-              <span className="text-white">K SINGH</span>
-            </motion.h1>
-
-            <motion.div
-              className="text-2xl md:text-3xl mb-12 text-gray-300"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
-              I don't just build products.{" "}
-              <motion.span
-                className="text-yellow-400 font-bold"
-                animate={{
-                  textShadow: ["0 0 0px #fbbf24", "0 0 20px #fbbf24", "0 0 0px #fbbf24"],
-                }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-              >
-                I craft experiences that make competitors jealous.
-              </motion.span>
-            </motion.div>
-
-            <motion.div
-              className="flex flex-wrap justify-center gap-4 mb-12"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5 }}
-            >
-              {["UX Wizard", "Code Ninja", "Brand Alchemist", "Growth Hacker"].map((skill, index) => (
-                <motion.div
-                  key={skill}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm border border-white/20 rounded-full"
-                  whileHover={{
-                    scale: 1.1,
-                    backgroundColor: "rgba(147, 51, 234, 0.3)",
-                  }}
-                  onMouseEnter={() => setCursorVariant("hover")}
-                  onMouseLeave={() => setCursorVariant("default")}
-                  animate={{
-                    y: [0, -10, 0],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
-                    delay: index * 0.2,
-                  }}
-                >
-                  {skill}
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <ScrollIndicator />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Scene 2: The Skill Arsenal */}
-      <section id="skills" className="min-h-screen py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-900/20 via-black to-blue-900/20" />
-
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <motion.h2
-            className="text-6xl font-black text-center mb-20"
-            initial={{ opacity: 0, x: -100 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <span className="bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
-              THE ARSENAL
-            </span>
-          </motion.h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <SkillCard
-              icon={<Code className="w-8 h-8" />}
-              title="Full-Stack Mastery"
-              description="React, Next.js, Node.js, Python - I speak fluent code in multiple languages"
-              skills={["React/Next.js", "Node.js", "Python", "TypeScript", "GraphQL"]}
-              color="from-blue-500 to-cyan-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <SkillCard
-              icon={<Palette className="w-8 h-8" />}
-              title="Design Sorcery"
-              description="From wireframes to pixel-perfect UIs that users actually want to use"
-              skills={["UI/UX Design", "Figma", "Adobe Suite", "Prototyping", "User Research"]}
-              color="from-purple-500 to-pink-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <SkillCard
-              icon={<TrendingUp className="w-8 h-8" />}
-              title="Growth Engineering"
-              description="Data-driven strategies that turn visitors into customers and customers into advocates"
-              skills={["Analytics", "A/B Testing", "SEO", "Conversion Optimization", "Growth Hacking"]}
-              color="from-green-500 to-emerald-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <SkillCard
-              icon={<Zap className="w-8 h-8" />}
-              title="AI Integration"
-              description="NVIDIA certified - I make AI work for business, not just demos"
-              skills={["GenAI", "Machine Learning", "AI/ML Integration", "Automation", "Data Science"]}
-              color="from-yellow-500 to-orange-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <SkillCard
-              icon={<Users className="w-8 h-8" />}
-              title="Team Leadership"
-              description="I don't just manage - I inspire teams to build legendary products"
-              skills={["Team Leadership", "Agile/Scrum", "Mentoring", "Strategy", "Cross-functional"]}
-              color="from-red-500 to-pink-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <SkillCard
-              icon={<Crown className="w-8 h-8" />}
-              title="Brand Elevation"
-              description="Transforming generic brands into market leaders that customers love"
-              skills={["Brand Strategy", "Market Positioning", "Visual Identity", "Storytelling", "Brand Architecture"]}
-              color="from-indigo-500 to-purple-500"
-              setCursorVariant={setCursorVariant}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Scene 3: The Magic Happens */}
-      <section id="projects" className="min-h-screen py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-black to-indigo-900/20" />
-
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <motion.h2
-            className="text-6xl font-black text-center mb-20"
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              WHERE MAGIC HAPPENS
-            </span>
-          </motion.h2>
-
-          <div className="grid lg:grid-cols-2 gap-12">
-            <ProjectShowcase
-              title="$10M Revenue Product"
-              description="Transformed a cluttered enterprise dashboard into an intuitive analytics platform that users actually love using."
-              impact={[
-                { label: "Revenue Generated", value: "$10M+", icon: <TrendingUp /> },
-                { label: "User Satisfaction", value: "94%", icon: <Heart /> },
-                { label: "Load Time Improvement", value: "300%", icon: <Lightning /> },
-              ]}
-              tech={["React", "Node.js", "PostgreSQL", "Redis", "AWS"]}
-              color="from-green-400 to-blue-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <ProjectShowcase
-              title="Global SaaS Platform"
-              description="Built a scalable platform serving 90K+ daily users across 12 countries with 99.9% uptime."
-              impact={[
-                { label: "Daily Active Users", value: "90K+", icon: <Users /> },
-                { label: "Countries Served", value: "12", icon: <Target /> },
-                { label: "Uptime", value: "99.9%", icon: <Award /> },
-              ]}
-              tech={["Next.js", "GraphQL", "Microservices", "Docker", "Kubernetes"]}
-              color="from-purple-400 to-pink-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <ProjectShowcase
-              title="AI-Powered Insights Engine"
-              description="Integrated GenAI to transform 4-hour manual analysis into 15-minute automated insights."
-              impact={[
-                { label: "Time Saved", value: "400%", icon: <Zap /> },
-                { label: "Accuracy Rate", value: "96%", icon: <Target /> },
-                { label: "Cost Reduction", value: "65%", icon: <TrendingUp /> },
-              ]}
-              tech={["Python", "TensorFlow", "OpenAI", "FastAPI", "React"]}
-              color="from-yellow-400 to-red-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <ProjectShowcase
-              title="Brand Transformation"
-              description="Elevated a generic B2B brand into a premium market leader with 280% increase in brand recognition."
-              impact={[
-                { label: "Brand Recognition", value: "280%", icon: <Crown /> },
-                { label: "Market Premium", value: "45%", icon: <Gem /> },
-                { label: "Customer Loyalty", value: "92%", icon: <Heart /> },
-              ]}
-              tech={["Brand Strategy", "Visual Design", "Market Research", "Content Strategy"]}
-              color="from-indigo-400 to-purple-500"
-              setCursorVariant={setCursorVariant}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Scene 4: The Results Speak */}
-      <section id="impact" className="min-h-screen py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/20 via-black to-orange-900/20" />
-
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <motion.h2
-            className="text-6xl font-black text-center mb-20"
-            initial={{ opacity: 0, y: 100 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              THE NUMBERS DON'T LIE
-            </span>
-          </motion.h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-            <StatCard
-              number="100%"
-              label="Project Success Rate"
-              description="Every project delivered on time, on budget, exceeding expectations"
-              icon={<Award className="w-12 h-12" />}
-              color="from-green-400 to-emerald-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <StatCard
-              number="$10M+"
-              label="Revenue Generated"
-              description="Direct revenue impact from products I've built and optimized"
-              icon={<TrendingUp className="w-12 h-12" />}
-              color="from-blue-400 to-cyan-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <StatCard
-              number="90K+"
-              label="Daily Active Users"
-              description="People using products I've designed and developed every single day"
-              icon={<Users className="w-12 h-12" />}
-              color="from-purple-400 to-pink-500"
-              setCursorVariant={setCursorVariant}
-            />
-
-            <StatCard
-              number="300%"
-              label="Average Performance Boost"
-              description="Typical improvement in speed, efficiency, and user satisfaction"
-              icon={<Lightning className="w-12 h-12" />}
-              color="from-yellow-400 to-orange-500"
-              setCursorVariant={setCursorVariant}
-            />
-          </div>
-
-          <TestimonialCarousel setCursorVariant={setCursorVariant} />
-        </div>
-      </section>
-
-      {/* Scene 5: Your Next Level */}
-      <section id="future" className="min-h-screen py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-pink-900/20" />
-
-        <div className="max-w-6xl mx-auto px-8 text-center relative z-10">
-          <motion.h2
-            className="text-6xl font-black mb-12"
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-              READY FOR YOUR NEXT LEVEL?
-            </span>
-          </motion.h2>
-
-          <motion.p
-            className="text-2xl text-gray-300 mb-16 max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            I don't just join teams - I elevate them. I don't just build features - I create experiences. I don't just
-            follow trends - I set them. <br />
-            <br />
-            <span className="text-yellow-400 font-bold">Your competitors are already worried. They should be.</span>
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <motion.button
-              className="px-12 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xl font-bold text-white shadow-2xl"
-              onMouseEnter={() => setCursorVariant("hover")}
-              onMouseLeave={() => setCursorVariant("default")}
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0 20px 40px rgba(147, 51, 234, 0.4)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => window.open("mailto:arpan@example.com?subject=Let's Build Something Amazing", "_blank")}
-            >
-              Let's Build Something Amazing
-              <Rocket className="inline ml-2 w-6 h-6" />
-            </motion.button>
-
-            <motion.button
-              className="px-8 py-4 border-2 border-white/30 rounded-full text-lg font-semibold text-white backdrop-blur-sm"
-              onMouseEnter={() => setCursorVariant("hover")}
-              onMouseLeave={() => setCursorVariant("default")}
-              whileHover={{
-                scale: 1.05,
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => window.open("/resume.pdf", "_blank")}
-            >
-              Download Resume
-              <ArrowRight className="inline ml-2 w-5 h-5" />
-            </motion.button>
-          </motion.div>
-
-          <motion.div
-            className="flex justify-center gap-8"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
-            {[
-              { icon: <Coffee />, label: "Coffee Chats" },
-              { icon: <Code />, label: "Code Reviews" },
-              { icon: <Sparkles />, label: "Creative Sessions" },
-              { icon: <Target />, label: "Strategy Calls" },
-            ].map((item, index) => (
-              <motion.div
-                key={item.label}
-                className="flex flex-col items-center gap-2 text-gray-400"
-                onMouseEnter={() => setCursorVariant("hover")}
-                onMouseLeave={() => setCursorVariant("default")}
-                whileHover={{
-                  scale: 1.1,
-                  color: "#ffffff",
-                }}
-                animate={{
-                  y: [0, -10, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Number.POSITIVE_INFINITY,
-                  delay: index * 0.3,
-                }}
-              >
-                {item.icon}
-                <span className="text-sm">{item.label}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Secret Easter Egg */}
+      {/* Before/After tooltip */}
       <AnimatePresence>
-        {secretUnlocked && (
+        {isRevealed && (
           <motion.div
-            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="absolute -top-16 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 whitespace-nowrap pointer-events-none"
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
           >
-            <motion.div
-              className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-md border border-white/20 rounded-3xl p-12 max-w-2xl text-center"
-              initial={{ scale: 0.5, rotateY: -90 }}
-              animate={{ scale: 1, rotateY: 0 }}
-              exit={{ scale: 0.5, rotateY: 90 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                className="w-20 h-20 mx-auto mb-6"
-              >
-                <Magic className="w-full h-full text-yellow-400" />
-              </motion.div>
-
-              <h3 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
-                🎉 SECRET UNLOCKED! 🎉
-              </h3>
-
-              <p className="text-xl text-gray-300 mb-6">
-                You found the Konami code! Here's a secret: I built this entire portfolio in one sitting while listening
-                to lo-fi hip hop and drinking way too much coffee. ☕
-              </p>
-
-              <p className="text-lg text-gray-400 mb-8">
-                This attention to detail and hidden features? That's what I bring to every project. Imagine what we
-                could build together! 🚀
-              </p>
-
-              <div className="flex gap-4 justify-center">
-                <Button
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold"
-                  onClick={() => window.open("mailto:arpan@example.com?subject=I Found Your Secret!", "_blank")}
-                  onMouseEnter={() => setCursorVariant("hover")}
-                  onMouseLeave={() => setCursorVariant("default")}
-                >
-                  Hire the Easter Egg Master
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setSecretUnlocked(false)}
-                  onMouseEnter={() => setCursorVariant("hover")}
-                  onMouseLeave={() => setCursorVariant("default")}
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  Keep Exploring
-                </Button>
-              </div>
-            </motion.div>
+            <p className="text-white text-xs font-medium">
+              {beforeState} → {afterState}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -649,27 +207,245 @@ export default function ArpanPortfolio() {
   )
 }
 
-// Component Definitions
-function FloatingParticles() {
+// Enhanced Skill Circle with Animated Border
+const AnimatedSkillCircle = ({
+  skill,
+  delay,
+  color,
+}: {
+  skill: { name: string; level: number; category: string }
+  delay: number
+  color: string
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
-    <div className="fixed inset-0 pointer-events-none">
-      {[...Array(50)].map((_, i) => (
+    <motion.div
+      className="relative group cursor-pointer"
+      initial={{ opacity: 0, scale: 0.8, y: 50 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.8, delay, type: "spring", stiffness: 100 }}
+      viewport={{ once: true }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ scale: 1.05, y: -5 }}
+    >
+      <div className="relative w-24 h-24 mx-auto">
+        {/* Breathing background layers */}
         <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white rounded-full opacity-30"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
+          className="absolute inset-0 rounded-full opacity-10"
+          style={{ backgroundColor: color }}
           animate={{
-            y: [0, -100, 0],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.3, 0.1],
           }}
           transition={{
-            duration: 3 + Math.random() * 2,
+            duration: 3,
             repeat: Number.POSITIVE_INFINITY,
-            delay: Math.random() * 2,
+            delay: delay * 0.5,
+          }}
+        />
+
+        <motion.div
+          className="absolute inset-2 rounded-full opacity-20"
+          style={{ backgroundColor: color }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: delay * 0.3,
+          }}
+        />
+
+        {/* Main skill circle */}
+        <div className="relative w-full h-full rounded-full bg-white/5 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden">
+          {/* Animated progress border */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90">
+            {/* Background circle */}
+            <circle cx="48" cy="48" r="44" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+
+            {/* Animated progress circle */}
+            <motion.circle
+              cx="48"
+              cy="48"
+              r="44"
+              fill="none"
+              stroke={color}
+              strokeWidth="4"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: skill.level / 100 }}
+              transition={{
+                duration: 2.5,
+                delay: delay + 0.5,
+                ease: "easeInOut",
+              }}
+              style={{
+                strokeDasharray: "276",
+                strokeDashoffset: "276",
+                filter: `drop-shadow(0 0 8px ${color})`,
+              }}
+              animate={{
+                filter: isHovered ? `drop-shadow(0 0 15px ${color})` : `drop-shadow(0 0 8px ${color})`,
+              }}
+            />
+
+            {/* Glowing dot at progress end */}
+            <motion.circle
+              cx={48 + 44 * Math.cos((skill.level / 100) * 2 * Math.PI - Math.PI / 2)}
+              cy={48 + 44 * Math.sin((skill.level / 100) * 2 * Math.PI - Math.PI / 2)}
+              r="3"
+              fill={color}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0.5, 1, 0.5],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                opacity: { duration: 2, repeat: Number.POSITIVE_INFINITY },
+                scale: { duration: 2, repeat: Number.POSITIVE_INFINITY },
+                delay: delay + 2.5,
+              }}
+              style={{
+                filter: `drop-shadow(0 0 6px ${color})`,
+              }}
+            />
+          </svg>
+
+          {/* Percentage display with breathing animation */}
+          <motion.div
+            className="relative z-10 text-center"
+            animate={{
+              scale: isHovered ? 1.1 : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.span
+              className="text-white text-sm font-bold block"
+              animate={{
+                textShadow: isHovered ? `0 0 15px ${color}` : `0 0 8px ${color}`,
+              }}
+            >
+              {skill.level}%
+            </motion.span>
+          </motion.div>
+
+          {/* Floating particles inside circle */}
+          <AnimatePresence>
+            {isHovered && (
+              <>
+                {[...Array(4)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full"
+                    style={{ backgroundColor: color }}
+                    initial={{
+                      opacity: 0,
+                      x: 48,
+                      y: 48,
+                    }}
+                    animate={{
+                      opacity: [0, 1, 0],
+                      x: 48 + (Math.random() - 0.5) * 60,
+                      y: 48 + (Math.random() - 0.5) * 60,
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 2,
+                      delay: i * 0.2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
+                  />
+                ))}
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Skill info */}
+        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-center">
+          <motion.h4
+            className="text-white font-bold text-sm mb-1"
+            animate={{
+              color: isHovered ? color : "white",
+            }}
+          >
+            {skill.name}
+          </motion.h4>
+          <p className="text-white/70 text-xs">{skill.category}</p>
+        </div>
+
+        {/* Enhanced tooltip on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              className="absolute -top-16 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 whitespace-nowrap pointer-events-none"
+              style={{ borderColor: `${color}40` }}
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="text-white text-sm font-medium">{skill.name}</p>
+              <p className="text-white/70 text-xs">{skill.category}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="text-xs" style={{ color: color }}>
+                  {skill.level}% Mastery
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  )
+}
+
+// Glass Morphism Card Component
+const GlassCard = ({
+  children,
+  className = "",
+  intensity = "medium",
+}: {
+  children: React.ReactNode
+  className?: string
+  intensity?: "light" | "medium" | "strong"
+}) => {
+  const intensityClasses = {
+    light: "bg-white/5 backdrop-blur-sm border-white/10",
+    medium: "bg-white/10 backdrop-blur-md border-white/20",
+    strong: "bg-white/15 backdrop-blur-lg border-white/30",
+  }
+
+  return <div className={`${intensityClasses[intensity]} border rounded-2xl ${className}`}>{children}</div>
+}
+
+// Floating Proof Particles
+const ProofParticles = ({ achievement, color }: { achievement: string; color: string }) => {
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-2 h-2 rounded-full opacity-60"
+          style={{
+            backgroundColor: color,
+            left: `${20 + i * 15}%`,
+            top: `${30 + (i % 2) * 40}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.3, 0.8, 0.3],
+            scale: [0.8, 1.2, 0.8],
+          }}
+          transition={{
+            duration: 3 + i * 0.5,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: i * 0.3,
           }}
         />
       ))}
@@ -677,267 +453,1214 @@ function FloatingParticles() {
   )
 }
 
-function ScrollIndicator() {
+// Sophisticated Cursor
+const SophisticatedCursor = ({ realityMode }: { realityMode: RealityMode }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  useEffect(() => {
+    const updateMousePosition = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      setIsHovering(
+        target.tagName === "BUTTON" ||
+          target.tagName === "A" ||
+          target.closest("button") ||
+          target.closest("a") ||
+          target.closest("[data-interactive]"),
+      )
+    }
+
+    window.addEventListener("mousemove", updateMousePosition)
+    window.addEventListener("mouseover", handleMouseOver)
+
+    return () => {
+      window.removeEventListener("mousemove", updateMousePosition)
+      window.removeEventListener("mouseover", handleMouseOver)
+    }
+  }, [])
+
   return (
-    <motion.div
-      className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-      animate={{ y: [0, 10, 0] }}
-      transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
-    >
-      <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-        <motion.div
-          className="w-1 h-3 bg-white rounded-full mt-2"
-          animate={{ y: [0, 12, 0] }}
-          transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-function SkillCard({
-  icon,
-  title,
-  description,
-  skills,
-  color,
-  setCursorVariant,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  skills: string[]
-  color: string
-  setCursorVariant: (variant: string) => void
-}) {
-  return (
-    <motion.div
-      className="group relative p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden"
-      onMouseEnter={() => setCursorVariant("hover")}
-      onMouseLeave={() => setCursorVariant("default")}
-      whileHover={{
-        scale: 1.05,
-        rotateY: 5,
-      }}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      viewport={{ once: true }}
-    >
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-      />
-
-      <div className="relative z-10">
-        <div
-          className={`w-16 h-16 bg-gradient-to-br ${color} rounded-2xl flex items-center justify-center mb-6 text-white`}
-        >
-          {icon}
-        </div>
-
-        <h3 className="text-2xl font-bold mb-4 text-white">{title}</h3>
-        <p className="text-gray-300 mb-6 leading-relaxed">{description}</p>
-
-        <div className="flex flex-wrap gap-2">
-          {skills.map((skill, index) => (
-            <motion.span
-              key={skill}
-              className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300"
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              {skill}
-            </motion.span>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function ProjectShowcase({
-  title,
-  description,
-  impact,
-  tech,
-  color,
-  setCursorVariant,
-}: {
-  title: string
-  description: string
-  impact: { label: string; value: string; icon: React.ReactNode }[]
-  tech: string[]
-  color: string
-  setCursorVariant: (variant: string) => void
-}) {
-  return (
-    <motion.div
-      className="group relative p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden"
-      onMouseEnter={() => setCursorVariant("hover")}
-      onMouseLeave={() => setCursorVariant("default")}
-      whileHover={{ scale: 1.02 }}
-      initial={{ opacity: 0, x: -50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: true }}
-    >
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-      />
-
-      <div className="relative z-10">
-        <h3 className="text-3xl font-bold mb-4 text-white">{title}</h3>
-        <p className="text-gray-300 mb-8 text-lg leading-relaxed">{description}</p>
-
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {impact.map((item, index) => (
-            <motion.div
-              key={item.label}
-              className="text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <div className={`text-2xl font-bold bg-gradient-to-r ${color} bg-clip-text text-transparent`}>
-                {item.value}
-              </div>
-              <div className="text-sm text-gray-400">{item.label}</div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {tech.map((technology, index) => (
-            <motion.span
-              key={technology}
-              className={`px-3 py-1 bg-gradient-to-r ${color} bg-opacity-20 rounded-full text-sm text-white border border-white/20`}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              viewport={{ once: true }}
-            >
-              {technology}
-            </motion.span>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function StatCard({
-  number,
-  label,
-  description,
-  icon,
-  color,
-  setCursorVariant,
-}: {
-  number: string
-  label: string
-  description: string
-  icon: React.ReactNode
-  color: string
-  setCursorVariant: (variant: string) => void
-}) {
-  return (
-    <motion.div
-      className="group text-center p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl"
-      onMouseEnter={() => setCursorVariant("hover")}
-      onMouseLeave={() => setCursorVariant("default")}
-      whileHover={{ scale: 1.05, rotateY: 5 }}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      viewport={{ once: true }}
-    >
-      <div
-        className={`w-20 h-20 bg-gradient-to-br ${color} rounded-full flex items-center justify-center mx-auto mb-6 text-white group-hover:scale-110 transition-transform duration-300`}
-      >
-        {icon}
-      </div>
-
+    <>
+      {/* Main cursor */}
       <motion.div
-        className={`text-5xl font-black mb-2 bg-gradient-to-r ${color} bg-clip-text text-transparent`}
-        initial={{ scale: 0 }}
-        whileInView={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-        viewport={{ once: true }}
-      >
-        {number}
-      </motion.div>
+        className="fixed w-4 h-4 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        style={{
+          left: mousePosition.x - 8,
+          top: mousePosition.y - 8,
+          backgroundColor: colors[realityMode],
+        }}
+        animate={{
+          scale: isHovering ? 1.5 : 1,
+        }}
+        transition={{ duration: 0.2 }}
+      />
 
-      <h3 className="text-xl font-bold mb-4 text-white">{label}</h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
+      {/* Outer ring */}
+      <motion.div
+        className="fixed w-8 h-8 rounded-full border pointer-events-none z-[9998]"
+        style={{
+          left: mousePosition.x - 16,
+          top: mousePosition.y - 16,
+          borderColor: `${colors[realityMode]}60`,
+        }}
+        animate={{
+          scale: isHovering ? 2 : 1,
+          opacity: isHovering ? 0.8 : 0.4,
+        }}
+        transition={{ duration: 0.3 }}
+      />
+    </>
+  )
+}
+
+// Timeline Category Selector
+const TimelineCategorySelector = ({
+  activeCategory,
+  onCategoryChange,
+  isVisible,
+  realityMode,
+}: {
+  activeCategory: RealityMode
+  onCategoryChange: (category: RealityMode) => void
+  isVisible: boolean
+  realityMode: RealityMode
+}) => {
+  const categories = [
+    { key: "architect" as RealityMode, label: "Architecture", icon: <Layers className="w-4 h-4" /> },
+    { key: "innovator" as RealityMode, label: "Innovation", icon: <Zap className="w-4 h-4" /> },
+    { key: "transformer" as RealityMode, label: "Transformation", icon: <Brain className="w-4 h-4" /> },
+    { key: "visionary" as RealityMode, label: "Vision", icon: <Sparkles className="w-4 h-4" /> },
+  ]
+
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          className="fixed top-8 right-8 z-50"
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 100 }}
+          transition={{ duration: 0.5 }}
+        >
+          <GlassCard className="p-4">
+            <p className="text-white text-sm font-medium mb-3 text-center">Timeline Focus</p>
+            <div className="flex flex-col gap-2">
+              {categories.map((category) => (
+                <motion.button
+                  key={category.key}
+                  onClick={() => onCategoryChange(category.key)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    activeCategory === category.key
+                      ? "bg-white/20 text-white"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
+                  }`}
+                  style={{
+                    borderLeft:
+                      activeCategory === category.key ? `3px solid ${colors[category.key]}` : "3px solid transparent",
+                  }}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {category.icon}
+                  {category.label}
+                </motion.button>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// Enhanced Timeline Event
+const TimelineEvent = ({
+  event,
+  index,
+  realityMode,
+}: {
+  event: { year: string; title: string; description: string; impact: string; category: string }
+  index: number
+  realityMode: RealityMode
+}) => {
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  return (
+    <motion.div
+      className="relative group"
+      initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      viewport={{ once: true }}
+    >
+      <div className={`flex items-center gap-8 ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
+        {/* Timeline Node */}
+        <motion.div
+          className="relative w-6 h-6 rounded-full border-4 border-white z-10 flex-shrink-0"
+          style={{ backgroundColor: colors[realityMode] }}
+          whileHover={{ scale: 1.2 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{ backgroundColor: colors[realityMode] }}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 0, 0.5],
+            }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          />
+        </motion.div>
+
+        {/* Content Card */}
+        <motion.div className="flex-1 max-w-md" whileHover={{ y: -5 }} transition={{ duration: 0.3 }}>
+          <GlassCard className="p-6 relative overflow-hidden">
+            <ProofParticles achievement={event.impact} color={colors[realityMode]} />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <Badge
+                  className="text-xs font-bold px-3 py-1"
+                  style={{
+                    backgroundColor: `${colors[realityMode]}20`,
+                    color: colors[realityMode],
+                    border: `1px solid ${colors[realityMode]}40`,
+                  }}
+                >
+                  {event.year}
+                </Badge>
+                <Badge variant="outline" className="text-xs text-white/70 border-white/30">
+                  {event.category}
+                </Badge>
+              </div>
+
+              <h3 className="text-lg font-bold text-white mb-2">{event.title}</h3>
+              <p className="text-white/80 text-sm mb-3 leading-relaxed">{event.description}</p>
+              <p className="text-sm font-semibold" style={{ color: colors[realityMode] }}>
+                {event.impact}
+              </p>
+            </div>
+          </GlassCard>
+        </motion.div>
+      </div>
     </motion.div>
   )
 }
 
-function TestimonialCarousel({ setCursorVariant }: { setCursorVariant: (variant: string) => void }) {
-  const testimonials = [
+// Story Section Component
+const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  const storyBeats = [
     {
-      quote: "Arpan doesn't just deliver - he transforms. Our product went from good to industry-leading.",
-      author: "Senior VP, Fortune 500 Company",
-      role: "Enterprise Client",
+      phase: "Foundation",
+      title: "The Systematic Thinker",
+      story:
+        "Every transformation begins with understanding systems. I learned that complexity isn't the enemy—it's the raw material for breakthrough solutions.",
+      insight: "Systems thinking became my lens for seeing patterns others missed.",
+      icon: <Layers className="w-6 h-6" />,
+      beforeState: "Chaos",
+      afterState: "System",
+      interactionType: "click" as const,
     },
     {
-      quote: "The most creative problem-solver I've worked with. He sees solutions where others see obstacles.",
-      author: "CTO, Global SaaS Platform",
-      role: "Technical Leadership",
+      phase: "Discovery",
+      title: "The Problem Decoder",
+      story:
+        "Through countless user interviews and data deep-dives, I discovered that the most valuable insights hide in the spaces between what people say and what they actually do.",
+      insight: "True innovation comes from translating unspoken needs into elegant solutions.",
+      icon: <Eye className="w-6 h-6" />,
+      beforeState: "Hidden",
+      afterState: "Revealed",
+      interactionType: "hover" as const,
     },
     {
-      quote: "Our conversion rates doubled within 3 months. Arpan's UX magic is real.",
-      author: "Head of Product, Fintech Startup",
-      role: "Product Strategy",
+      phase: "Innovation",
+      title: "The Boundary Breaker",
+      story:
+        "When conventional approaches hit walls, I learned to question the walls themselves. Some of my biggest breakthroughs came from asking 'What if we're solving the wrong problem?'",
+      insight: "Constraints are often self-imposed. The real magic happens when you reframe the entire challenge.",
+      icon: <Zap className="w-6 h-6" />,
+      beforeState: "Limited",
+      afterState: "Limitless",
+      interactionType: "drag" as const,
+    },
+    {
+      phase: "Impact",
+      title: "The Value Creator",
+      story:
+        "Ideas without execution are just dreams. I mastered the art of turning insights into measurable business impact, learning that the best solutions feel inevitable in hindsight.",
+      insight: "Sustainable transformation requires both vision and relentless execution discipline.",
+      icon: <Target className="w-6 h-6" />,
+      beforeState: "Idea",
+      afterState: "Impact",
+      interactionType: "click" as const,
+    },
+    {
+      phase: "Evolution",
+      title: "The Future Architect",
+      story:
+        "Today, I don't just solve current problems—I architect solutions for challenges that don't exist yet. The future belongs to those who can see around corners.",
+      insight: "The most powerful transformations prepare organizations for futures they can't yet imagine.",
+      icon: <Brain className="w-6 h-6" />,
+      beforeState: "Present",
+      afterState: "Future",
+      interactionType: "hover" as const,
     },
   ]
 
-  const [current, setCurrent] = useState(0)
+  return (
+    <section className="py-20 relative">
+      <div className="max-w-6xl mx-auto px-8">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <h2
+            className="text-5xl md:text-6xl font-black mb-6"
+            style={{
+              background: `linear-gradient(135deg, ${colors[realityMode]}, white)`,
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            THE TRANSFORMATION STORY
+          </h2>
+          <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+            Every breakthrough is built on a foundation of systematic learning, deliberate practice, and the courage to
+            question everything.
+          </p>
+        </motion.div>
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % testimonials.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [testimonials.length])
+        <div className="space-y-12">
+          {storyBeats.map((beat, index) => (
+            <motion.div
+              key={beat.phase}
+              className="relative"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  {/* Interactive Phase Indicator */}
+                  <div className="flex-shrink-0">
+                    <InteractiveStoryIcon
+                      icon={beat.icon}
+                      beforeState={beat.beforeState}
+                      afterState={beat.afterState}
+                      color={colors[realityMode]}
+                      type={beat.interactionType}
+                    />
+                    <div className="mt-4">
+                      <Badge
+                        className="text-xs font-bold"
+                        style={{
+                          backgroundColor: `${colors[realityMode]}20`,
+                          color: colors[realityMode],
+                          border: `1px solid ${colors[realityMode]}40`,
+                        }}
+                      >
+                        {beat.phase}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Story Content */}
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-white mb-4">{beat.title}</h3>
+                    <p className="text-white/80 text-lg mb-4 leading-relaxed">{beat.story}</p>
+                    <div
+                      className="text-base font-semibold italic border-l-4 pl-4"
+                      style={{
+                        color: colors[realityMode],
+                        borderColor: colors[realityMode],
+                      }}
+                    >
+                      "{beat.insight}"
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subtle background pattern */}
+                <div
+                  className="absolute top-0 right-0 w-32 h-32 opacity-5"
+                  style={{
+                    background: `radial-gradient(circle, ${colors[realityMode]} 2px, transparent 2px)`,
+                    backgroundSize: "20px 20px",
+                  }}
+                />
+              </GlassCard>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Journey Visualization with Mouse Tracking Glow
+const JourneyVisualization = ({ realityMode }: { realityMode: RealityMode }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  const milestones = [
+    { title: "Foundation", desc: "Systems Thinking", progress: 100 },
+    { title: "Discovery", desc: "User Research", progress: 95 },
+    { title: "Innovation", desc: "Creative Solutions", progress: 90 },
+    { title: "Impact", desc: "Business Results", progress: 88 },
+    { title: "Evolution", desc: "Future Vision", progress: 85 },
+  ]
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      setMousePosition({
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100,
+      })
+    }
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovering(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovering(false)
+  }
+
+  // Calculate distance from mouse to each milestone
+  const getDistanceFromMouse = (index: number) => {
+    const milestoneX = (index / (milestones.length - 1)) * 100
+    const milestoneY = 50 // Center vertically
+    const distance = Math.sqrt(Math.pow(mousePosition.x - milestoneX, 2) + Math.pow(mousePosition.y - milestoneY, 2))
+    return Math.max(0, 30 - distance) / 30 // Normalize to 0-1, with 30% being max glow distance
+  }
 
   return (
-    <div className="relative max-w-4xl mx-auto">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          className="text-center p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl"
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -100 }}
-          transition={{ duration: 0.5 }}
-          onMouseEnter={() => setCursorVariant("hover")}
-          onMouseLeave={() => setCursorVariant("default")}
+    <motion.div
+      className="relative rounded-2xl"
+      animate={
+        isHovering
+          ? {
+              boxShadow: [
+                `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
+                `0 0 30px ${colors[realityMode]}30, 0 0 60px ${colors[realityMode]}15, inset 0 0 30px ${colors[realityMode]}08`,
+                `0 0 20px ${colors[realityMode]}20, 0 0 40px ${colors[realityMode]}10, inset 0 0 20px ${colors[realityMode]}05`,
+              ],
+              border: `1px solid ${colors[realityMode]}40`,
+            }
+          : {
+              boxShadow: "0 0 0px transparent",
+              border: "1px solid transparent",
+            }
+      }
+      transition={{
+        boxShadow: {
+          duration: isHovering ? 0.8 : 0.6,
+          repeat: isHovering ? Number.POSITIVE_INFINITY : 0,
+          ease: "easeInOut",
+          repeatDelay: isHovering ? 0 : undefined,
+        },
+        border: {
+          duration: isHovering ? 0.8 : 0.6,
+          ease: "easeInOut",
+        },
+      }}
+    >
+      <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
+        <div
+          ref={containerRef}
+          className="relative"
+          onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{ cursor: "none" }}
         >
-          <div className="text-6xl text-yellow-400 mb-4">"</div>
-          <p className="text-2xl text-gray-300 mb-8 italic leading-relaxed">{testimonials[current].quote}</p>
-          <div className="text-white font-bold text-lg">{testimonials[current].author}</div>
-          <div className="text-gray-400">{testimonials[current].role}</div>
-        </motion.div>
-      </AnimatePresence>
+          {/* Mouse Tracking Glow Effect */}
+          <AnimatePresence>
+            {isHovering && (
+              <motion.div
+                className="absolute pointer-events-none z-10"
+                style={{
+                  left: `${mousePosition.x}%`,
+                  top: `${mousePosition.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                {/* Main glow */}
+                <div
+                  className="w-32 h-32 rounded-full blur-xl opacity-60"
+                  style={{
+                    background: `radial-gradient(circle, ${colors[realityMode]}60, transparent 70%)`,
+                  }}
+                />
+                {/* Inner glow */}
+                <div
+                  className="absolute inset-0 w-16 h-16 rounded-full blur-md opacity-80 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    background: `radial-gradient(circle, ${colors[realityMode]}80, transparent 60%)`,
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      <div className="flex justify-center gap-2 mt-8">
-        {testimonials.map((_, index) => (
-          <button
-            key={index}
-            className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              current === index ? "bg-yellow-400" : "bg-white/30"
-            }`}
-            onClick={() => setCurrent(index)}
-            onMouseEnter={() => setCursorVariant("hover")}
-            onMouseLeave={() => setCursorVariant("default")}
-          />
-        ))}
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-20">
+            {milestones.map((milestone, index) => {
+              const glowIntensity = isHovering ? getDistanceFromMouse(index) : 0
+
+              return (
+                <motion.div
+                  key={milestone.title}
+                  className="text-center relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  {/* Progress Circle with Dynamic Glow */}
+                  <div className="relative w-20 h-20 mx-auto mb-4">
+                    {/* Glowing border effect */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        boxShadow: `0 0 ${20 + glowIntensity * 30}px ${colors[realityMode]}${Math.floor(
+                          glowIntensity * 80,
+                        )
+                          .toString(16)
+                          .padStart(2, "0")}`,
+                        border: `2px solid ${colors[realityMode]}${Math.floor(20 + glowIntensity * 60)
+                          .toString(16)
+                          .padStart(2, "0")}`,
+                      }}
+                      animate={{
+                        scale: 1 + glowIntensity * 0.1,
+                      }}
+                      transition={{ duration: 0.2 }}
+                    />
+
+                    <svg className="w-full h-full -rotate-90 relative z-10">
+                      <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+                      <motion.circle
+                        cx="40"
+                        cy="40"
+                        r="35"
+                        fill="none"
+                        stroke={colors[realityMode]}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        whileInView={{ pathLength: milestone.progress / 100 }}
+                        transition={{ duration: 2, delay: index * 0.2 }}
+                        style={{
+                          strokeDasharray: "220",
+                          strokeDashoffset: "220",
+                          filter: `drop-shadow(0 0 ${8 + glowIntensity * 12}px ${colors[realityMode]})`,
+                        }}
+                        animate={{
+                          strokeWidth: 3 + glowIntensity * 2,
+                        }}
+                      />
+                    </svg>
+
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.span
+                        className="text-white text-sm font-bold"
+                        style={{
+                          textShadow: `0 0 ${8 + glowIntensity * 15}px ${colors[realityMode]}`,
+                        }}
+                        animate={{
+                          scale: 1 + glowIntensity * 0.1,
+                        }}
+                      >
+                        {milestone.progress}%
+                      </motion.span>
+                    </div>
+                  </div>
+
+                  <motion.h4
+                    className="text-white font-bold text-sm mb-1"
+                    style={{
+                      textShadow: glowIntensity > 0.3 ? `0 0 10px ${colors[realityMode]}` : "none",
+                    }}
+                    animate={{
+                      color: glowIntensity > 0.5 ? colors[realityMode] : "white",
+                    }}
+                  >
+                    {milestone.title}
+                  </motion.h4>
+                  <p className="text-white/70 text-xs">{milestone.desc}</p>
+
+                  {/* Connection Line with Glow */}
+                  {index < milestones.length - 1 && (
+                    <motion.div
+                      className="hidden md:block absolute top-10 left-full w-6 h-0.5 bg-white/20"
+                      style={{
+                        boxShadow: glowIntensity > 0.2 ? `0 0 8px ${colors[realityMode]}` : "none",
+                        backgroundColor: glowIntensity > 0.3 ? `${colors[realityMode]}60` : "rgba(255,255,255,0.2)",
+                      }}
+                      animate={{
+                        height: glowIntensity > 0.4 ? "3px" : "2px",
+                      }}
+                    />
+                  )}
+
+                  {/* Proximity Particles */}
+                  <AnimatePresence>
+                    {glowIntensity > 0.6 && (
+                      <>
+                        {[...Array(3)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute w-1 h-1 rounded-full pointer-events-none"
+                            style={{
+                              backgroundColor: colors[realityMode],
+                              left: "50%",
+                              top: "50%",
+                            }}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{
+                              opacity: [0, 1, 0],
+                              scale: [0, 1, 0],
+                              x: (Math.random() - 0.5) * 60,
+                              y: (Math.random() - 0.5) * 60,
+                            }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                              duration: 2,
+                              delay: i * 0.3,
+                              repeat: Number.POSITIVE_INFINITY,
+                            }}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
+  )
+}
+
+// Skills Grid
+const SkillsGrid = ({ realityMode }: { realityMode: RealityMode }) => {
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  const skills = [
+    { name: "UX Strategy", level: 95, category: "Design" },
+    { name: "System Design", level: 90, category: "Architecture" },
+    { name: "Data Analytics", level: 88, category: "Analysis" },
+    { name: "AI Integration", level: 85, category: "Technology" },
+    { name: "Team Leadership", level: 92, category: "Management" },
+    { name: "Product Strategy", level: 89, category: "Business" },
+  ]
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+      {skills.map((skill, index) => (
+        <AnimatedSkillCircle key={skill.name} skill={skill} delay={index * 0.15} color={colors[realityMode]} />
+      ))}
+    </div>
+  )
+}
+
+// Main Portfolio Component
+export default function ArpanPortfolio() {
+  const [realityMode, setRealityMode] = useState<RealityMode>("architect")
+  const [timelineCategory, setTimelineCategory] = useState<RealityMode>("architect")
+  const [showTimelineControls, setShowTimelineControls] = useState(false)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ container: containerRef })
+
+  const colors = {
+    architect: "#00E5D3",
+    innovator: "#FF6B9D",
+    transformer: "#FFD166",
+    visionary: "#8A2BE2",
+  }
+
+  // Timeline data
+  const timelineData = {
+    architect: [
+      {
+        year: "2024",
+        title: "Enterprise Architecture Overhaul",
+        description:
+          "Redesigned core system architecture for 10+ SaaS platforms, implementing scalable design patterns and microservices architecture.",
+        impact: "40% performance improvement",
+        category: "System Architecture",
+      },
+      {
+        year: "2023",
+        title: "Cross-Platform Design System",
+        description:
+          "Built comprehensive design system spanning web, mobile, and desktop with 98% consistency across all touchpoints.",
+        impact: "90K+ users unified experience",
+        category: "Design Systems",
+      },
+      {
+        year: "2022",
+        title: "Scalable Infrastructure Design",
+        description:
+          "Architected cloud-native infrastructure supporting global expansion across 15+ markets with localized experiences.",
+        impact: "15+ markets launched",
+        category: "Infrastructure",
+      },
+      {
+        year: "2021",
+        title: "API Architecture Framework",
+        description:
+          "Designed RESTful API architecture enabling seamless third-party integrations and internal service communication.",
+        impact: "50+ integrations enabled",
+        category: "API Design",
+      },
+    ],
+    innovator: [
+      {
+        year: "2024",
+        title: "AI-Powered User Insights",
+        description:
+          "Pioneered machine learning algorithms to predict user behavior patterns, revolutionizing personalization strategies.",
+        impact: "$2M+ revenue from personalization",
+        category: "AI Innovation",
+      },
+      {
+        year: "2023",
+        title: "Voice Interface Revolution",
+        description:
+          "Created industry-first voice-controlled dashboard interface, reducing task completion time by 60%.",
+        impact: "60% faster task completion",
+        category: "Interface Innovation",
+      },
+      {
+        year: "2022",
+        title: "Augmented Reality Prototyping",
+        description: "Developed AR-based product visualization tools that increased customer engagement by 300%.",
+        impact: "300% engagement increase",
+        category: "Emerging Tech",
+      },
+      {
+        year: "2021",
+        title: "Predictive Analytics Engine",
+        description: "Built predictive models for user churn prevention, saving $5M+ in customer retention costs.",
+        impact: "$5M+ retention savings",
+        category: "Data Innovation",
+      },
+    ],
+    transformer: [
+      {
+        year: "2024",
+        title: "Revenue Optimization Platform",
+        description:
+          "Transformed pricing strategies through data-driven insights, resulting in 25% revenue increase across all product lines.",
+        impact: "$10M+ revenue impact",
+        category: "Business Growth",
+      },
+      {
+        year: "2023",
+        title: "Operational Efficiency Revolution",
+        description:
+          "Streamlined business processes across departments, reducing operational costs by 35% while improving output quality.",
+        impact: "35% cost reduction",
+        category: "Process Optimization",
+      },
+      {
+        year: "2022",
+        title: "Customer Success Transformation",
+        description: "Redesigned customer journey mapping and success metrics, improving retention rates by 45%.",
+        impact: "45% retention improvement",
+        category: "Customer Success",
+      },
+      {
+        year: "2021",
+        title: "Digital Transformation Initiative",
+        description:
+          "Led company-wide digital transformation, modernizing legacy systems and improving team productivity by 200%.",
+        impact: "200% productivity boost",
+        category: "Digital Transformation",
+      },
+    ],
+    visionary: [
+      {
+        year: "2024",
+        title: "Future-Ready Platform Architecture",
+        description:
+          "Designed next-generation platform architecture anticipating Web3, IoT, and quantum computing integration needs.",
+        impact: "5-year technology roadmap",
+        category: "Future Planning",
+      },
+      {
+        year: "2023",
+        title: "Sustainable Design Framework",
+        description:
+          "Created carbon-neutral design principles and sustainable UX patterns, reducing digital carbon footprint by 40%.",
+        impact: "40% carbon footprint reduction",
+        category: "Sustainability",
+      },
+      {
+        year: "2022",
+        title: "Metaverse Experience Design",
+        description:
+          "Pioneered immersive virtual collaboration spaces, preparing organization for distributed future work models.",
+        impact: "Next-gen collaboration ready",
+        category: "Metaverse",
+      },
+      {
+        year: "2021",
+        title: "Ethical AI Framework",
+        description:
+          "Established ethical guidelines and bias detection systems for AI implementations, ensuring responsible innovation.",
+        impact: "Ethical AI standards set",
+        category: "Responsible AI",
+      },
+    ],
+  }
+
+  // Check if timeline section is in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowTimelineControls(entry.isIntersecting)
+      },
+      { threshold: 0.3 },
+    )
+
+    if (timelineRef.current) {
+      observer.observe(timelineRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800"
+      style={{ cursor: "none" }}
+    >
+      {/* Animated Background Pattern */}
+      <motion.div
+        className="fixed inset-0 opacity-5"
+        style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, ${colors[realityMode]} 2px, transparent 2px)`,
+          backgroundSize: "50px 50px",
+        }}
+        animate={{
+          backgroundPosition: ["0% 0%", "100% 100%"],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "linear",
+        }}
+      />
+
+      {/* Sophisticated Cursor */}
+      <SophisticatedCursor realityMode={realityMode} />
+
+      {/* Timeline Controls */}
+      <TimelineCategorySelector
+        activeCategory={timelineCategory}
+        onCategoryChange={setTimelineCategory}
+        isVisible={showTimelineControls}
+        realityMode={realityMode}
+      />
+
+      {/* LinkedIn Link */}
+      <motion.a
+        href="https://linkedin.com/in/arpan-k-singh/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed top-8 left-8 z-50"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <GlassCard className="p-3" intensity="medium">
+          <Linkedin className="w-6 h-6 text-white" />
+        </GlassCard>
+      </motion.a>
+
+      {/* Hero Section */}
+      <section className="min-h-screen flex items-center justify-center relative">
+        <div className="max-w-6xl mx-auto px-8 text-center">
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+            <motion.h1
+              className="text-6xl md:text-8xl font-black leading-tight mb-8"
+              style={{
+                background: `linear-gradient(135deg, ${colors[realityMode]}, white, ${colors[realityMode]})`,
+                backgroundSize: "200% 200%",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+            >
+              ARPAN K SINGH
+            </motion.h1>
+
+            <motion.p
+              className="text-2xl md:text-3xl text-white/90 mb-4 font-light"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 1 }}
+            >
+              Transformation Architect
+            </motion.p>
+
+            <motion.p
+              className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 1 }}
+            >
+              Where systematic thinking meets breakthrough innovation. Turning complexity into clarity through
+              deliberate design and measurable impact.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              <motion.button
+                className="px-8 py-4 rounded-full text-lg font-semibold border-2 relative overflow-hidden group"
+                style={{
+                  borderColor: colors[realityMode],
+                  color: colors[realityMode],
+                }}
+                onClick={() => document.getElementById("journey")?.scrollIntoView({ behavior: "smooth" })}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                data-interactive
+              >
+                <motion.div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: colors[realityMode] }}
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "0%" }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative z-10 flex items-center gap-2 group-hover:text-black transition-colors">
+                  Explore Journey
+                  <ArrowRight className="w-5 h-5" />
+                </span>
+              </motion.button>
+
+              <motion.a
+                href="mailto:arpansingh30@gmail.com"
+                className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/30 hover:bg-white/10 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                data-interactive
+              >
+                <span className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Connect
+                </span>
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+        >
+          <ChevronDown className="w-6 h-6 text-white/50" />
+        </motion.div>
+      </section>
+
+      {/* Journey Section */}
+      <section id="journey" className="py-20">
+        <div className="max-w-6xl mx-auto px-8">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="text-4xl md:text-5xl font-black mb-6"
+              style={{
+                background: `linear-gradient(135deg, ${colors[realityMode]}, white)`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              THE TRANSFORMATION JOURNEY
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              From systematic foundations to breakthrough innovations, each milestone represents a deliberate step
+              toward mastery.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <JourneyVisualization realityMode={realityMode} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Story Section */}
+      <StorySection realityMode={realityMode} />
+
+      {/* Skills Section */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-8">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="text-4xl md:text-5xl font-black mb-6"
+              style={{
+                background: `linear-gradient(135deg, ${colors[realityMode]}, white)`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              EXPERTISE MASTERY
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Quantified competencies across the transformation spectrum, each percentage representing years of
+              deliberate practice.
+            </p>
+          </motion.div>
+
+          <SkillsGrid realityMode={realityMode} />
+        </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section ref={timelineRef} className="py-20">
+        <div className="max-w-5xl mx-auto px-8">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="text-4xl md:text-5xl font-black mb-6"
+              style={{
+                background: `linear-gradient(135deg, white, ${colors[realityMode]})`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              IMPACT TIMELINE
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Explore different facets of transformation through focused expertise areas. Each timeline reveals a unique
+              perspective on systematic innovation.
+            </p>
+          </motion.div>
+
+          {/* Timeline Line */}
+          <div className="relative">
+            <motion.div
+              className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2"
+              style={{
+                background: `linear-gradient(to bottom, transparent, ${colors[timelineCategory]}, transparent)`,
+              }}
+              initial={{ height: 0 }}
+              whileInView={{ height: "100%" }}
+              transition={{ duration: 2 }}
+              viewport={{ once: true }}
+            />
+
+            <div className="space-y-16">
+              {timelineData[timelineCategory].map((event, index) => (
+                <TimelineEvent
+                  key={`${timelineCategory}-${event.year}`}
+                  event={event}
+                  index={index}
+                  realityMode={realityMode}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="text-4xl md:text-5xl font-black mb-8"
+              style={{
+                background: `linear-gradient(135deg, ${colors[realityMode]}, white)`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              CREATE IMPACT TOGETHER
+            </h2>
+            <p className="text-xl text-white/80 mb-12 leading-relaxed max-w-2xl mx-auto">
+              Ready to transform your next challenge into a breakthrough solution?
+              <br />
+              <span className="font-semibold" style={{ color: colors[realityMode] }}>
+                Let's architect the future together.
+              </span>
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <motion.a
+                href="mailto:arpansingh30@gmail.com"
+                className="px-10 py-4 rounded-full text-lg font-semibold border-2 relative overflow-hidden group"
+                style={{
+                  borderColor: colors[realityMode],
+                  color: colors[realityMode],
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                data-interactive
+              >
+                <motion.div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: colors[realityMode] }}
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "0%" }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative z-10 flex items-center gap-2 group-hover:text-black transition-colors">
+                  <Mail className="w-5 h-5" />
+                  Start Conversation
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="https://linkedin.com/in/arpan-k-singh/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-10 py-4 rounded-full text-lg font-semibold text-white border border-white/30 hover:bg-white/10 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                data-interactive
+              >
+                <span className="flex items-center gap-2">
+                  <Linkedin className="w-5 h-5" />
+                  Connect on LinkedIn
+                </span>
+              </motion.a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-white/60 text-sm">© 2024 Arpan K Singh. Crafted with precision and passion.</p>
+            <div className="flex items-center gap-6">
+              <motion.a
+                href="mailto:arpansingh30@gmail.com"
+                className="text-white/60 hover:text-white transition-colors duration-300"
+                whileHover={{ scale: 1.1 }}
+                data-interactive
+              >
+                <Mail className="w-5 h-5" />
+              </motion.a>
+              <motion.a
+                href="https://linkedin.com/in/arpan-k-singh/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/60 hover:text-white transition-colors duration-300"
+                whileHover={{ scale: 1.1 }}
+                data-interactive
+              >
+                <Linkedin className="w-5 h-5" />
+              </motion.a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
