@@ -1,21 +1,9 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import React from "react"
+import type React from "react"
 
 import { motion, AnimatePresence, useScroll } from "framer-motion"
-import {
-  Linkedin,
-  Brain,
-  Zap,
-  Layers,
-  Sparkles,
-  ArrowRight,
-  Mail,
-  Eye,
-  Target,
-  ChevronDown,
-  MousePointer2,
-} from "lucide-react"
+import { Linkedin, Brain, Zap, Layers, Sparkles, ArrowRight, Mail, Eye, ChevronDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 // Reality Modes
@@ -37,598 +25,6 @@ const BreathingBackground = ({ color }: { color: string }) => {
         ease: "easeInOut",
       }}
     />
-  )
-}
-
-// Enhanced Custom SVG Components for Interactive Story Icons
-const SystemMechanism = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
-  <motion.svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Central gear */}
-    <motion.g
-      animate={{ rotate: isRevealed ? 360 : 0 }}
-      transition={{ duration: 3, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
-      style={{ transformOrigin: "50px 50px" }}
-    >
-      <circle cx="50" cy="50" r="15" stroke={color} strokeWidth="3" fill="none" />
-      {[...Array(8)].map((_, i) => (
-        <line
-          key={i}
-          x1="50"
-          y1="35"
-          x2="50"
-          y2="30"
-          stroke={color}
-          strokeWidth="3"
-          strokeLinecap="round"
-          transform={`rotate(${i * 45}, 50, 50)`}
-        />
-      ))}
-    </motion.g>
-
-    {/* Connected smaller gears */}
-    <motion.g
-      animate={{ rotate: isRevealed ? -360 : 0 }}
-      transition={{ duration: 2, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
-      style={{ transformOrigin: "25px 25px" }}
-    >
-      <circle cx="25" cy="25" r="8" stroke={color} strokeWidth="2" fill="none" />
-      {[...Array(6)].map((_, i) => (
-        <line
-          key={i}
-          x1="25"
-          y1="17"
-          x2="25"
-          y2="14"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          transform={`rotate(${i * 60}, 25, 25)`}
-        />
-      ))}
-    </motion.g>
-
-    <motion.g
-      animate={{ rotate: isRevealed ? -360 : 0 }}
-      transition={{ duration: 2.5, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
-      style={{ transformOrigin: "75px 75px" }}
-    >
-      <circle cx="75" cy="75" r="8" stroke={color} strokeWidth="2" fill="none" />
-      {[...Array(6)].map((_, i) => (
-        <line
-          key={i}
-          x1="75"
-          y1="67"
-          x2="75"
-          y2="64"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          transform={`rotate(${i * 60}, 75, 75)`}
-        />
-      ))}
-    </motion.g>
-
-    {/* Connection lines */}
-    <motion.line
-      x1="35"
-      y1="35"
-      x2="42"
-      y2="42"
-      stroke={color}
-      strokeWidth="2"
-      initial={{ opacity: 0.3 }}
-      animate={{ opacity: isRevealed ? [0.3, 1, 0.3] : 0.3 }}
-      transition={{ duration: 1, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0 }}
-    />
-    <motion.line
-      x1="65"
-      y1="65"
-      x2="58"
-      y2="58"
-      stroke={color}
-      strokeWidth="2"
-      initial={{ opacity: 0.3 }}
-      animate={{ opacity: isRevealed ? [0.3, 1, 0.3] : 0.3 }}
-      transition={{ duration: 1, repeat: isRevealed ? Number.POSITIVE_INFINITY : 0, delay: 0.5 }}
-    />
-  </motion.svg>
-)
-
-const PuzzleSolver = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
-  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Puzzle pieces that come together */}
-    <motion.path
-      d="M20 30 L45 30 L45 55 L20 55 Z"
-      stroke={color}
-      strokeWidth="3"
-      fill="none"
-      initial={{ x: -10, opacity: 0.5 }}
-      animate={{ x: isRevealed ? 0 : -10, opacity: isRevealed ? 1 : 0.5 }}
-      transition={{ duration: 0.8 }}
-    />
-    <motion.path
-      d="M55 30 L80 30 L80 55 L55 55 Z"
-      stroke={color}
-      strokeWidth="3"
-      fill="none"
-      initial={{ x: 10, opacity: 0.5 }}
-      animate={{ x: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
-      transition={{ duration: 0.8 }}
-    />
-    <motion.path
-      d="M20 65 L45 65 L45 90 L20 90 Z"
-      stroke={color}
-      strokeWidth="3"
-      fill="none"
-      initial={{ y: 10, opacity: 0.5 }}
-      animate={{ y: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
-      transition={{ duration: 0.8, delay: 0.2 }}
-    />
-    <motion.path
-      d="M55 65 L80 65 L80 90 L55 90 Z"
-      stroke={color}
-      strokeWidth="3"
-      fill="none"
-      initial={{ x: 10, y: 10, opacity: 0.5 }}
-      animate={{ x: isRevealed ? 0 : 10, y: isRevealed ? 0 : 10, opacity: isRevealed ? 1 : 0.5 }}
-      transition={{ duration: 0.8, delay: 0.4 }}
-    />
-
-    {/* Connection points that light up */}
-    {isRevealed && (
-      <>
-        <motion.circle
-          cx="45"
-          cy="42.5"
-          r="3"
-          fill={color}
-          initial={{ scale: 0 }}
-          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        />
-        <motion.circle
-          cx="42.5"
-          cy="65"
-          r="3"
-          fill={color}
-          initial={{ scale: 0 }}
-          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
-          transition={{ duration: 0.5, delay: 1 }}
-        />
-        <motion.circle
-          cx="57.5"
-          cy="65"
-          r="3"
-          fill={color}
-          initial={{ scale: 0 }}
-          animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.8] }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-        />
-      </>
-    )}
-  </svg>
-)
-
-const BarrierBreaker = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
-  <motion.svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Wall bricks that crumble */}
-    {[...Array(12)].map((_, i) => {
-      const row = Math.floor(i / 4)
-      const col = i % 4
-      const x = 20 + col * 15 + (row % 2) * 7.5
-      const y = 30 + row * 12
-
-      return (
-        <motion.rect
-          key={i}
-          x={x}
-          y={y}
-          width="12"
-          height="8"
-          stroke={color}
-          strokeWidth="2"
-          fill="none"
-          initial={{ opacity: 1, scale: 1 }}
-          animate={
-            isRevealed
-              ? {
-                  opacity: [1, 0.5, 0],
-                  scale: [1, 0.8, 0.3],
-                  x: x + (Math.random() - 0.5) * 30,
-                  y: y + (Math.random() - 0.5) * 20,
-                  rotate: (Math.random() - 0.5) * 180,
-                }
-              : {}
-          }
-          transition={{ duration: 1.5, delay: i * 0.1 }}
-        />
-      )
-    })}
-
-    {/* Energy burst effect */}
-    {isRevealed && (
-      <>
-        {[...Array(8)].map((_, i) => (
-          <motion.line
-            key={i}
-            x1="50"
-            y1="50"
-            x2={50 + Math.cos((i * 45 * Math.PI) / 180) * 25}
-            y2={50 + Math.sin((i * 45 * Math.PI) / 180) * 25}
-            stroke={color}
-            strokeWidth="2"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          />
-        ))}
-      </>
-    )}
-  </motion.svg>
-)
-
-const ValueGrowth = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
-  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Growing bars with value indicators */}
-    <motion.rect
-      x="15"
-      y={isRevealed ? 50 : 80}
-      width="12"
-      height={isRevealed ? 30 : 0}
-      fill={color}
-      transition={{ duration: 0.6 }}
-    />
-    <motion.rect
-      x="35"
-      y={isRevealed ? 35 : 80}
-      width="12"
-      height={isRevealed ? 45 : 0}
-      fill={color}
-      transition={{ duration: 0.6, delay: 0.2 }}
-    />
-    <motion.rect
-      x="55"
-      y={isRevealed ? 25 : 80}
-      width="12"
-      height={isRevealed ? 55 : 0}
-      fill={color}
-      transition={{ duration: 0.6, delay: 0.4 }}
-    />
-    <motion.rect
-      x="75"
-      y={isRevealed ? 15 : 80}
-      width="12"
-      height={isRevealed ? 65 : 0}
-      fill={color}
-      transition={{ duration: 0.6, delay: 0.6 }}
-    />
-
-    {/* Upward arrow */}
-    {isRevealed && (
-      <motion.path
-        d="M50 20 L45 30 L55 30 Z"
-        fill={color}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1 }}
-      />
-    )}
-
-    {/* Value sparkles */}
-    {isRevealed && (
-      <>
-        {[...Array(6)].map((_, i) => (
-          <motion.circle
-            key={i}
-            cx={20 + i * 12}
-            cy={70 - i * 8}
-            r="2"
-            fill={color}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{
-              scale: [0, 1.5, 1],
-              opacity: [0, 1, 0.7],
-              y: [0, -5, 0],
-            }}
-            transition={{
-              duration: 1,
-              delay: 0.8 + i * 0.1,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatDelay: 2,
-            }}
-          />
-        ))}
-      </>
-    )}
-  </svg>
-)
-
-const FutureNetwork = ({ isRevealed, color }: { isRevealed: boolean; color: string }) => (
-  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Network nodes that appear and connect */}
-    {[
-      { x: 50, y: 20 },
-      { x: 20, y: 40 },
-      { x: 80, y: 40 },
-      { x: 35, y: 70 },
-      { x: 65, y: 70 },
-      { x: 50, y: 85 },
-    ].map((node, i) => (
-      <motion.circle
-        key={i}
-        cx={node.x}
-        cy={node.y}
-        r="4"
-        fill={color}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={
-          isRevealed
-            ? {
-                scale: [0, 1.3, 1],
-                opacity: 1,
-              }
-            : { scale: 0, opacity: 0 }
-        }
-        transition={{ duration: 0.5, delay: i * 0.1 }}
-      />
-    ))}
-
-    {/* Connecting lines that pulse */}
-    {[
-      { from: { x: 50, y: 20 }, to: { x: 20, y: 40 } },
-      { from: { x: 50, y: 20 }, to: { x: 80, y: 40 } },
-      { from: { x: 20, y: 40 }, to: { x: 35, y: 70 } },
-      { from: { x: 80, y: 40 }, to: { x: 65, y: 70 } },
-      { from: { x: 35, y: 70 }, to: { x: 50, y: 85 } },
-      { from: { x: 65, y: 70 }, to: { x: 50, y: 85 } },
-      { from: { x: 35, y: 70 }, to: { x: 65, y: 70 } },
-    ].map((connection, i) => (
-      <motion.line
-        key={i}
-        x1={connection.from.x}
-        y1={connection.from.y}
-        x2={connection.to.x}
-        y2={connection.to.y}
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={
-          isRevealed
-            ? {
-                pathLength: 1,
-                opacity: [0, 0.8, 0.4, 0.8],
-              }
-            : { pathLength: 0, opacity: 0 }
-        }
-        transition={{
-          pathLength: { duration: 0.8, delay: 0.6 + i * 0.1 },
-          opacity: {
-            duration: 2,
-            delay: 1.4,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatDelay: 0.5,
-          },
-        }}
-      />
-    ))}
-
-    {/* Data flow particles */}
-    {isRevealed && (
-      <>
-        {[...Array(3)].map((_, i) => (
-          <motion.circle
-            key={i}
-            cx="50"
-            cy="20"
-            r="1.5"
-            fill={color}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 1, 0],
-              x: [0, -30, -15],
-              y: [0, 20, 50],
-            }}
-            transition={{
-              duration: 2,
-              delay: 2 + i * 0.7,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatDelay: 1,
-            }}
-          />
-        ))}
-      </>
-    )}
-  </svg>
-)
-
-// Enhanced Interactive Story Icon Component
-interface InteractiveStoryIconProps {
-  icon: React.ReactNode
-  beforeState: string
-  revealedContent: React.ReactNode
-  color: string
-  type?: "click" | "drag" | "hover"
-  title: string
-}
-
-const InteractiveStoryIcon = ({
-  icon,
-  beforeState,
-  revealedContent,
-  color,
-  type = "click",
-  title,
-}: InteractiveStoryIconProps) => {
-  const [isRevealed, setIsRevealed] = useState(false)
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-
-  const handleDragStart = () => {
-    if (type === "drag") {
-      setIsDragging(true)
-    }
-  }
-
-  const handleDrag = (event: any, info: any) => {
-    if (type === "drag") {
-      setDragPosition({ x: info.offset.x, y: info.offset.y })
-      const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2)
-      setIsRevealed(distance > 20)
-    }
-  }
-
-  const handleDragEnd = () => {
-    if (type === "drag") {
-      setIsDragging(false)
-      setDragPosition({ x: 0, y: 0 })
-      setTimeout(() => setIsRevealed(false), 3000)
-    }
-  }
-
-  return (
-    <div className="relative">
-      <motion.div
-        className="w-20 h-20 rounded-full border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer"
-        style={{ backgroundColor: `${color}15` }}
-        onClick={() => type === "click" && setIsRevealed(!isRevealed)}
-        onHoverStart={() => type === "hover" && setIsRevealed(true)}
-        onHoverEnd={() => type === "hover" && setIsRevealed(false)}
-        drag={type === "drag"}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        dragConstraints={{ left: -40, right: 40, top: -40, bottom: 40 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        whileDrag={{ scale: 1.1, rotate: 2 }}
-        animate={{
-          x: dragPosition.x,
-          y: dragPosition.y,
-          boxShadow: isRevealed ? `0 0 25px ${color}40, 0 0 50px ${color}20` : `0 0 10px ${color}20`,
-          borderColor: isRevealed ? `${color}60` : "rgba(255,255,255,0.3)",
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      >
-        {/* Breathing background */}
-        <BreathingBackground color={color} />
-
-        {/* Before state */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ color: color }}
-          animate={{
-            opacity: isRevealed ? 0 : 1,
-            scale: isRevealed ? 0.7 : 1,
-            rotateY: isRevealed ? 90 : 0,
-          }}
-          transition={{ duration: 0.4 }}
-        >
-          {icon}
-        </motion.div>
-
-        {/* After state */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          animate={{
-            opacity: isRevealed ? 1 : 0,
-            scale: isRevealed ? 1 : 0.7,
-            rotateY: isRevealed ? 0 : -90,
-          }}
-          transition={{ duration: 0.4 }}
-        >
-          {React.isValidElement(revealedContent)
-            ? React.cloneElement(revealedContent as React.ReactElement, { isRevealed, color })
-            : revealedContent}
-        </motion.div>
-
-        {/* Enhanced ripple effect */}
-        <AnimatePresence>
-          {isRevealed && (
-            <>
-              <motion.div
-                className="absolute inset-0 rounded-full border-2"
-                style={{ borderColor: `${color}60` }}
-                initial={{ scale: 1, opacity: 0.8 }}
-                animate={{ scale: 2.5, opacity: 0 }}
-                exit={{ scale: 1, opacity: 0 }}
-                transition={{ duration: 1.2 }}
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border"
-                style={{ borderColor: `${color}40` }}
-                initial={{ scale: 1, opacity: 0.6 }}
-                animate={{ scale: 3.5, opacity: 0 }}
-                exit={{ scale: 1, opacity: 0 }}
-                transition={{ duration: 1.5, delay: 0.2 }}
-              />
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Enhanced particle burst */}
-        <AnimatePresence>
-          {isRevealed && (
-            <>
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1.5 h-1.5 rounded-full"
-                  style={{
-                    backgroundColor: color,
-                    left: "50%",
-                    top: "50%",
-                  }}
-                  initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{
-                    scale: [0, 1.2, 0],
-                    x: Math.cos((i * 45 * Math.PI) / 180) * 50,
-                    y: Math.sin((i * 45 * Math.PI) / 180) * 50,
-                  }}
-                  exit={{ scale: 0 }}
-                  transition={{ duration: 1.2, delay: i * 0.05 }}
-                />
-              ))}
-            </>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Interaction hint */}
-      <motion.div
-        className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-xs text-white/60 flex items-center gap-1"
-        animate={{ opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY }}
-      >
-        {type === "click" && "Click to activate"}
-        {type === "drag" && "Drag to solve"}
-        {type === "hover" && "Hover to explore"}
-        <MousePointer2 className="w-3 h-3" />
-      </motion.div>
-
-      {/* Enhanced status tooltip */}
-      <AnimatePresence>
-        {isRevealed && (
-          <motion.div
-            className="absolute -top-20 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md border rounded-xl px-4 py-2 whitespace-nowrap pointer-events-none z-50"
-            style={{
-              borderColor: `${color}40`,
-              boxShadow: `0 0 20px ${color}20`,
-            }}
-            initial={{ opacity: 0, y: 10, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-          >
-            <p className="text-white text-sm font-medium">{title}</p>
-            <p className="text-xs" style={{ color: color }}>
-              {beforeState} → Activated
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   )
 }
 
@@ -1095,7 +491,508 @@ const TimelineEvent = ({
   )
 }
 
-// Story Section Component
+// Interactive Showcase Component for Transformation Story
+const InteractiveShowcase = ({
+  title,
+  description,
+  insight,
+  interactionType,
+  color,
+  phase,
+  index,
+}: {
+  title: string
+  description: string
+  insight: string
+  interactionType: string
+  color: string
+  phase: string
+  index: number
+}) => {
+  const [isInteracting, setIsInteracting] = useState(false)
+  const [cursorVariant, setCursorVariant] = useState("default")
+
+  return (
+    <motion.div
+      className="glass-panel p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-500 relative overflow-hidden"
+      onMouseEnter={() => setCursorVariant("hover")}
+      onMouseLeave={() => setCursorVariant("default")}
+      whileHover={{ scale: 1.02 }}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      viewport={{ once: true }}
+    >
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Interactive Element */}
+        <div className="flex-shrink-0 w-full lg:w-80">
+          <div className="mb-4">
+            <Badge
+              className="text-xs font-bold mb-2"
+              style={{
+                backgroundColor: `${color}20`,
+                color: color,
+                border: `1px solid ${color}40`,
+              }}
+            >
+              {phase}
+            </Badge>
+          </div>
+
+          <div className="h-48 relative overflow-hidden rounded-xl bg-white/5 border border-white/10">
+            <InteractiveElement
+              type={interactionType}
+              color={color}
+              isActive={isInteracting}
+              onInteraction={setIsInteracting}
+            />
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-xs text-white/60">{getInteractionHint(interactionType)}</p>
+          </div>
+        </div>
+
+        {/* Story Content */}
+        <div className="flex-1">
+          <h3 className="text-2xl font-bold text-white mb-4">{title}</h3>
+          <p className="text-white/80 text-lg mb-4 leading-relaxed">{description}</p>
+          <div
+            className="text-base font-semibold italic border-l-4 pl-4"
+            style={{
+              color: color,
+              borderColor: color,
+            }}
+          >
+            "{insight}"
+          </div>
+        </div>
+      </div>
+
+      {/* Subtle background pattern */}
+      <div
+        className="absolute top-0 right-0 w-32 h-32 opacity-5"
+        style={{
+          background: `radial-gradient(circle, ${color} 2px, transparent 2px)`,
+          backgroundSize: "20px 20px",
+        }}
+      />
+    </motion.div>
+  )
+}
+
+// Interactive Element Component
+const InteractiveElement = ({
+  type,
+  color,
+  isActive,
+  onInteraction,
+}: {
+  type: string
+  color: string
+  isActive: boolean
+  onInteraction: (active: boolean) => void
+}) => {
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const [connectionPoints, setConnectionPoints] = useState<number[]>([])
+  const [growthBars, setGrowthBars] = useState([20, 40, 30, 60, 45])
+  const [visionNodes, setVisionNodes] = useState(Array(6).fill(false))
+
+  switch (type) {
+    case "system-builder":
+      return (
+        <div
+          className="relative w-full h-full flex items-center justify-center"
+          onMouseEnter={() => onInteraction(true)}
+          onMouseLeave={() => onInteraction(false)}
+        >
+          {/* Central Hub */}
+          <motion.div
+            className="w-12 h-12 rounded-full border-2 flex items-center justify-center relative z-10"
+            style={{ borderColor: color, backgroundColor: `${color}20` }}
+            animate={{
+              scale: isActive ? [1, 1.1, 1] : 1,
+              boxShadow: isActive ? `0 0 20px ${color}40` : "none",
+            }}
+            transition={{ duration: 1, repeat: isActive ? Number.POSITIVE_INFINITY : 0 }}
+          >
+            <Layers className="w-6 h-6" style={{ color }} />
+          </motion.div>
+
+          {/* Orbiting Elements */}
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-4 h-4 rounded-full"
+              style={{
+                backgroundColor: color,
+                left: "50%",
+                top: "50%",
+              }}
+              animate={{
+                x: isActive ? Math.cos((i * 60 * Math.PI) / 180) * 60 - 8 : -8,
+                y: isActive ? Math.sin((i * 60 * Math.PI) / 180) * 60 - 8 : -8,
+                opacity: isActive ? [0.3, 1, 0.3] : 0.5,
+                scale: isActive ? [0.8, 1.2, 0.8] : 1,
+              }}
+              transition={{
+                duration: 2,
+                repeat: isActive ? Number.POSITIVE_INFINITY : 0,
+                delay: i * 0.2,
+              }}
+            />
+          ))}
+
+          {/* Connection Lines */}
+          {isActive && (
+            <svg className="absolute inset-0 w-full h-full">
+              {[...Array(6)].map((_, i) => (
+                <motion.line
+                  key={i}
+                  x1="50%"
+                  y1="50%"
+                  x2={`${50 + Math.cos((i * 60 * Math.PI) / 180) * 30}%`}
+                  y2={`${50 + Math.sin((i * 60 * Math.PI) / 180) * 30}%`}
+                  stroke={color}
+                  strokeWidth="1"
+                  strokeOpacity="0.6"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                />
+              ))}
+            </svg>
+          )}
+        </div>
+      )
+
+    case "pattern-matcher":
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="grid grid-cols-4 gap-2">
+            {[...Array(16)].map((_, i) => (
+              <motion.button
+                key={i}
+                className="w-8 h-8 rounded border-2 border-white/20 hover:border-white/40 transition-colors"
+                style={{
+                  backgroundColor: connectionPoints.includes(i) ? `${color}40` : "transparent",
+                  borderColor: connectionPoints.includes(i) ? color : "rgba(255,255,255,0.2)",
+                }}
+                onClick={() => {
+                  if (connectionPoints.includes(i)) {
+                    setConnectionPoints(connectionPoints.filter((p) => p !== i))
+                  } else {
+                    setConnectionPoints([...connectionPoints, i])
+                  }
+                  onInteraction(connectionPoints.length > 3)
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <motion.div
+                  className="w-2 h-2 rounded-full mx-auto"
+                  style={{ backgroundColor: connectionPoints.includes(i) ? color : "rgba(255,255,255,0.3)" }}
+                  animate={{
+                    scale: connectionPoints.includes(i) ? [1, 1.3, 1] : 1,
+                  }}
+                  transition={{ duration: 0.5, repeat: connectionPoints.includes(i) ? Number.POSITIVE_INFINITY : 0 }}
+                />
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Pattern Recognition Feedback */}
+          {connectionPoints.length > 3 && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+            >
+              <div
+                className="text-sm font-bold px-3 py-1 rounded-full border"
+                style={{ color, borderColor: color, backgroundColor: `${color}20` }}
+              >
+                Pattern Detected!
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )
+
+    case "barrier-dissolver":
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          {/* Draggable Energy Ball */}
+          <motion.div
+            className="w-8 h-8 rounded-full cursor-grab active:cursor-grabbing"
+            style={{ backgroundColor: color, boxShadow: `0 0 15px ${color}60` }}
+            drag
+            dragConstraints={{ left: -100, right: 100, top: -80, bottom: 80 }}
+            onDragStart={() => onInteraction(true)}
+            onDragEnd={() => {
+              onInteraction(false)
+              setDragPosition({ x: 0, y: 0 })
+            }}
+            onDrag={(_, info) => {
+              setDragPosition({ x: info.offset.x, y: info.offset.y })
+            }}
+            whileDrag={{ scale: 1.2 }}
+            animate={{
+              boxShadow: isActive ? `0 0 25px ${color}80` : `0 0 15px ${color}60`,
+            }}
+          />
+
+          {/* Barrier Blocks */}
+          {[...Array(12)].map((_, i) => {
+            const row = Math.floor(i / 4)
+            const col = i % 4
+            const blockX = -60 + col * 30
+            const blockY = -30 + row * 20
+            const distance = Math.sqrt(Math.pow(dragPosition.x - blockX, 2) + Math.pow(dragPosition.y - blockY, 2))
+            const shouldDissolve = distance < 40 && isActive
+
+            return (
+              <motion.div
+                key={i}
+                className="absolute w-6 h-4 border border-white/40"
+                style={{
+                  left: `calc(50% + ${blockX}px)`,
+                  top: `calc(50% + ${blockY}px)`,
+                  backgroundColor: shouldDissolve ? "transparent" : "rgba(255,255,255,0.1)",
+                }}
+                animate={{
+                  opacity: shouldDissolve ? 0 : 1,
+                  scale: shouldDissolve ? 0.5 : 1,
+                  rotate: shouldDissolve ? 45 : 0,
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            )
+          })}
+
+          {/* Energy Particles */}
+          {isActive && (
+            <>
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 rounded-full pointer-events-none"
+                  style={{
+                    backgroundColor: color,
+                    left: `calc(50% + ${dragPosition.x}px)`,
+                    top: `calc(50% + ${dragPosition.y}px)`,
+                  }}
+                  animate={{
+                    x: Math.cos((i * 45 * Math.PI) / 180) * 30,
+                    y: Math.sin((i * 45 * Math.PI) / 180) * 30,
+                    opacity: [1, 0],
+                    scale: [1, 0],
+                  }}
+                  transition={{ duration: 0.8, repeat: Number.POSITIVE_INFINITY, delay: i * 0.1 }}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      )
+
+    case "growth-accelerator":
+      return (
+        <div className="relative w-full h-full flex items-end justify-center gap-2 px-8 pb-8">
+          {growthBars.map((height, i) => (
+            <motion.button
+              key={i}
+              className="w-8 rounded-t transition-colors hover:opacity-80"
+              style={{
+                height: `${height}%`,
+                backgroundColor: color,
+                opacity: 0.7,
+              }}
+              onClick={() => {
+                const newBars = [...growthBars]
+                newBars[i] = Math.min(100, newBars[i] + 15)
+                setGrowthBars(newBars)
+                onInteraction(true)
+                setTimeout(() => onInteraction(false), 1000)
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                height: `${height}%`,
+                boxShadow: isActive ? `0 0 15px ${color}60` : "none",
+              }}
+              transition={{ duration: 0.5 }}
+            />
+          ))}
+
+          {/* Growth Arrow */}
+          <motion.div
+            className="absolute top-4 left-1/2 -translate-x-1/2"
+            animate={{
+              y: isActive ? [-5, 5, -5] : 0,
+              opacity: isActive ? 1 : 0.5,
+            }}
+            transition={{ duration: 1, repeat: isActive ? Number.POSITIVE_INFINITY : 0 }}
+          >
+            <ArrowRight className="w-6 h-6 rotate-[-90deg]" style={{ color }} />
+          </motion.div>
+
+          {/* Value Indicators */}
+          {isActive && (
+            <>
+              {growthBars.map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute text-xs font-bold"
+                  style={{
+                    left: `${20 + i * 15}%`,
+                    bottom: `${growthBars[i] + 10}%`,
+                    color,
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  +{Math.floor(growthBars[i] * 0.8)}%
+                </motion.div>
+              ))}
+            </>
+          )}
+        </div>
+      )
+
+    case "vision-crystallizer":
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          {/* Central Vision Core */}
+          <motion.div
+            className="w-16 h-16 rounded-full border-2 flex items-center justify-center relative"
+            style={{ borderColor: color, backgroundColor: `${color}10` }}
+            animate={{
+              scale: isActive ? [1, 1.1, 1] : 1,
+              borderColor: isActive ? [color, `${color}80`, color] : color,
+            }}
+            transition={{ duration: 2, repeat: isActive ? Number.POSITIVE_INFINITY : 0 }}
+            onMouseEnter={() => onInteraction(true)}
+            onMouseLeave={() => onInteraction(false)}
+          >
+            <Eye className="w-8 h-8" style={{ color }} />
+          </motion.div>
+
+          {/* Vision Network Nodes */}
+          {[...Array(6)].map((_, i) => {
+            const angle = (i * 60 * Math.PI) / 180
+            const radius = 80
+            const x = Math.cos(angle) * radius
+            const y = Math.sin(angle) * radius
+
+            return (
+              <motion.button
+                key={i}
+                className="absolute w-6 h-6 rounded-full border-2"
+                style={{
+                  left: `calc(50% + ${x}px - 12px)`,
+                  top: `calc(50% + ${y}px - 12px)`,
+                  borderColor: visionNodes[i] ? color : "rgba(255,255,255,0.3)",
+                  backgroundColor: visionNodes[i] ? `${color}40` : "transparent",
+                }}
+                onClick={() => {
+                  const newNodes = [...visionNodes]
+                  newNodes[i] = !newNodes[i]
+                  setVisionNodes(newNodes)
+                  onInteraction(newNodes.filter(Boolean).length > 3)
+                }}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+                animate={{
+                  boxShadow: visionNodes[i] ? `0 0 10px ${color}60` : "none",
+                }}
+              >
+                <motion.div
+                  className="w-2 h-2 rounded-full mx-auto"
+                  style={{ backgroundColor: visionNodes[i] ? color : "rgba(255,255,255,0.5)" }}
+                  animate={{
+                    scale: visionNodes[i] ? [1, 1.3, 1] : 1,
+                  }}
+                  transition={{ duration: 1, repeat: visionNodes[i] ? Number.POSITIVE_INFINITY : 0 }}
+                />
+              </motion.button>
+            )
+          })}
+
+          {/* Connection Lines */}
+          {isActive && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              {visionNodes.map((isActive, i) => {
+                if (!isActive) return null
+                const angle = (i * 60 * Math.PI) / 180
+                const radius = 80
+                const x = 50 + (Math.cos(angle) * radius * 100) / 320
+                const y = 50 + (Math.sin(angle) * radius * 100) / 192
+
+                return (
+                  <motion.line
+                    key={i}
+                    x1="50%"
+                    y1="50%"
+                    x2={`${x}%`}
+                    y2={`${y}%`}
+                    stroke={color}
+                    strokeWidth="2"
+                    strokeOpacity="0.6"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                )
+              })}
+            </svg>
+          )}
+
+          {/* Future Glimpse */}
+          {visionNodes.filter(Boolean).length > 4 && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+            >
+              <div
+                className="text-sm font-bold px-4 py-2 rounded-full border backdrop-blur-sm"
+                style={{ color, borderColor: color, backgroundColor: `${color}20` }}
+              >
+                Future Crystallized
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )
+
+    default:
+      return null
+  }
+}
+
+// Helper function for interaction hints
+const getInteractionHint = (type: string): string => {
+  switch (type) {
+    case "system-builder":
+      return "Hover to activate system connections"
+    case "pattern-matcher":
+      return "Click dots to reveal hidden patterns"
+    case "barrier-dissolver":
+      return "Drag the energy to dissolve barriers"
+    case "growth-accelerator":
+      return "Click bars to accelerate growth"
+    case "vision-crystallizer":
+      return "Activate nodes to crystallize vision"
+    default:
+      return "Interact to explore"
+  }
+}
+
+// Story Section Component with Creative Interactions
 const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
   const colors = {
     architect: "#00E5D3",
@@ -1111,10 +1008,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       story:
         "Every transformation begins with understanding systems. I learned that complexity isn't the enemy—it's the raw material for breakthrough solutions.",
       insight: "Systems thinking became my lens for seeing patterns others missed.",
-      icon: <Layers className="w-6 h-6" />,
-      beforeState: "Chaos",
-      revealedContent: <SystemMechanism isRevealed={false} color={""} />,
-      interactionType: "click" as const,
+      interactionType: "system-builder",
     },
     {
       phase: "Discovery",
@@ -1122,10 +1016,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       story:
         "Through countless user interviews and data deep-dives, I discovered that the most valuable insights hide in the spaces between what people say and what they actually do.",
       insight: "True innovation comes from translating unspoken needs into elegant solutions.",
-      icon: <Eye className="w-6 h-6" />,
-      beforeState: "Hidden",
-      revealedContent: <PuzzleSolver isRevealed={false} color={""} />,
-      interactionType: "drag" as const,
+      interactionType: "pattern-matcher",
     },
     {
       phase: "Innovation",
@@ -1133,10 +1024,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       story:
         "When conventional approaches hit walls, I learned to question the walls themselves. Some of my biggest breakthroughs came from asking 'What if we're solving the wrong problem?'",
       insight: "Constraints are often self-imposed. The real magic happens when you reframe the entire challenge.",
-      icon: <Zap className="w-6 h-6" />,
-      beforeState: "Limited",
-      revealedContent: <BarrierBreaker isRevealed={false} color={""} />,
-      interactionType: "drag" as const,
+      interactionType: "barrier-dissolver",
     },
     {
       phase: "Impact",
@@ -1144,10 +1032,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       story:
         "Ideas without execution are just dreams. I mastered the art of turning insights into measurable business impact, learning that the best solutions feel inevitable in hindsight.",
       insight: "Sustainable transformation requires both vision and relentless execution discipline.",
-      icon: <Target className="w-6 h-6" />,
-      beforeState: "Idea",
-      revealedContent: <ValueGrowth isRevealed={false} color={""} />,
-      interactionType: "click" as const,
+      interactionType: "growth-accelerator",
     },
     {
       phase: "Evolution",
@@ -1155,10 +1040,7 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
       story:
         "Today, I don't just solve current problems—I architect solutions for challenges that don't exist yet. The future belongs to those who can see around corners.",
       insight: "The most powerful transformations prepare organizations for futures they can't yet imagine.",
-      icon: <Brain className="w-6 h-6" />,
-      beforeState: "Present",
-      revealedContent: <FutureNetwork isRevealed={false} color={""} />,
-      interactionType: "hover" as const,
+      interactionType: "vision-crystallizer",
     },
   ]
 
@@ -1191,66 +1073,16 @@ const StorySection = ({ realityMode }: { realityMode: RealityMode }) => {
 
         <div className="space-y-12">
           {storyBeats.map((beat, index) => (
-            <motion.div
+            <InteractiveShowcase
               key={beat.phase}
-              className="relative"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <GlassCard className="p-8 relative overflow-hidden" intensity="medium">
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                  {/* Interactive Phase Indicator */}
-                  <div className="flex-shrink-0">
-                    <InteractiveStoryIcon
-                      icon={beat.icon}
-                      beforeState={beat.beforeState}
-                      revealedContent={beat.revealedContent}
-                      color={colors[realityMode]}
-                      type={beat.interactionType}
-                      title={beat.title}
-                    />
-                    <div className="mt-4">
-                      <Badge
-                        className="text-xs font-bold"
-                        style={{
-                          backgroundColor: `${colors[realityMode]}20`,
-                          color: colors[realityMode],
-                          border: `1px solid ${colors[realityMode]}40`,
-                        }}
-                      >
-                        {beat.phase}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Story Content */}
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-white mb-4">{beat.title}</h3>
-                    <p className="text-white/80 text-lg mb-4 leading-relaxed">{beat.story}</p>
-                    <div
-                      className="text-base font-semibold italic border-l-4 pl-4"
-                      style={{
-                        color: colors[realityMode],
-                        borderColor: colors[realityMode],
-                      }}
-                    >
-                      "{beat.insight}"
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subtle background pattern */}
-                <div
-                  className="absolute top-0 right-0 w-32 h-32 opacity-5"
-                  style={{
-                    background: `radial-gradient(circle, ${colors[realityMode]} 2px, transparent 2px)`,
-                    backgroundSize: "20px 20px",
-                  }}
-                />
-              </GlassCard>
-            </motion.div>
+              title={beat.title}
+              phase={beat.phase}
+              description={beat.story}
+              insight={beat.insight}
+              interactionType={beat.interactionType}
+              color={colors[realityMode]}
+              index={index}
+            />
           ))}
         </div>
       </div>
