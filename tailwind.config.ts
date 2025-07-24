@@ -1,19 +1,25 @@
 import type { Config } from "tailwindcss"
 
 const config: Config = {
+  darkMode: ["class"],
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
-        "deep-space": "#0A192F",
-        "quantum-teal": "#00E5D3",
-        "innovation-pink": "#FF6B9D",
-        "value-gold": "#FFD166",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -53,22 +59,23 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      animation: {
-        "quantum-pulse": "quantum-pulse 2s ease-in-out infinite",
-        "particle-float": "particle-float 3s ease-in-out infinite",
-      },
       keyframes: {
-        "quantum-pulse": {
-          "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
-          "50%": { opacity: "1", transform: "scale(1.05)" },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        "particle-float": {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [],
-}
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
+
 export default config
