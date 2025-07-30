@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, memo } from "react"
 import type React from "react"
 
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from "framer-motion"
 import {
   Linkedin,
   Brain,
@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import CustomTooltip from "@/components/custom-tooltip"
 import BeamsBackground from "@/components/background-beams" // Import the new component
-import HeroBackgroundShapes from "@/components/hero-background-shapes" // Import the new hero background component
+import CrystalSurface from "@/components/crystal-surface" // Import the NEW hero background component
 
 // Reality Modes
 type RealityMode = "architect" | "innovator" | "transformer" | "visionary"
@@ -353,11 +353,7 @@ const SophisticatedCursor = memo(({ realityMode }: { realityMode: RealityMode })
   const cursorX = useMotionValue(0)
   const cursorY = useMotionValue(0)
 
-  // Adjusted spring config for smoother, less "sticky" movement
-  const springConfig = { damping: 15, stiffness: 50 } // Lower stiffness and damping for a floatier feel
-  const cursorSpringX = useSpring(cursorX, springConfig)
-  const cursorSpringY = useSpring(cursorY, springConfig)
-
+  // Remove spring - both cursors now follow exactly
   const [isHovering, setIsHovering] = useState(false)
 
   const colors = {
@@ -395,15 +391,15 @@ const SophisticatedCursor = memo(({ realityMode }: { realityMode: RealityMode })
 
   return (
     <>
-      {/* Main cursor */}
+      {/* Main cursor - follows exactly */}
       <motion.div
-        className="fixed w-4 h-4 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed w-4 h-4 rounded-full pointer-events-none z-[9999]"
         style={{
-          left: cursorSpringX,
-          top: cursorSpringY,
+          left: cursorX,
+          top: cursorY,
           backgroundColor: colors[realityMode],
-          translateX: "-50%", // Center the cursor
-          translateY: "-50%", // Center the cursor
+          translateX: "-50%",
+          translateY: "-50%",
         }}
         animate={{
           scale: isHovering ? 1.5 : 1,
@@ -411,21 +407,21 @@ const SophisticatedCursor = memo(({ realityMode }: { realityMode: RealityMode })
         transition={{ duration: 0.2 }}
       />
 
-      {/* Outer ring */}
+      {/* Outer ring - now also follows exactly, no spring delay */}
       <motion.div
         className="fixed w-8 h-8 rounded-full border pointer-events-none z-[9998]"
         style={{
-          left: cursorSpringX,
-          top: cursorSpringY,
+          left: cursorX, // Now follows exactly like main cursor
+          top: cursorY, // Now follows exactly like main cursor
           borderColor: `${colors[realityMode]}60`,
-          translateX: "-50%", // Center the cursor
-          translateY: "-50%", // Center the cursor
+          translateX: "-50%",
+          translateY: "-50%",
         }}
         animate={{
           scale: isHovering ? 2 : 1,
           opacity: isHovering ? 0.8 : 0.4,
         }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }} // Reduced duration for snappier response
       />
     </>
   )
@@ -2003,14 +1999,14 @@ export default function ArpanPortfolio() {
 
       {/* Hero Section */}
       <section ref={heroSectionRef} className="min-h-screen flex items-center justify-center relative">
-        {/* Hero Background Shapes - NEW IMPLEMENTATION */}
+        {/* Crystal Surface - NEW IMPLEMENTATION */}
         <motion.div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             opacity: heroShapesOpacity, // Apply scroll-based opacity
           }}
         >
-          <HeroBackgroundShapes />
+          <CrystalSurface realityMode={realityMode} opacity={heroShapesOpacity.get()} />
         </motion.div>
 
         <motion.div
