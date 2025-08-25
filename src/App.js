@@ -186,37 +186,7 @@ function App() {
     }
   };
 
-  // Create clip-path to cut hole in overlay for hovered panel
-  const getOverlayClipPath = () => {
-    if (!hoveredPanelRect) return 'none';
 
-    const { left, top, right, bottom } = hoveredPanelRect;
-    const borderRadius = parseFloat(controls.panels.borderRadius) * 16; // Convert rem to px
-    const r = Math.min(borderRadius, (right - left) / 2, (bottom - top) / 2);
-
-    // Create SVG path for rounded rectangle hole
-    const svgPath = `
-      M 0,0 
-      L 0,${top} 
-      L ${left},${top} 
-      L ${left},${top + r} 
-      Q ${left},${top} ${left + r},${top} 
-      L ${right - r},${top} 
-      Q ${right},${top} ${right},${top + r} 
-      L ${right},${bottom - r} 
-      Q ${right},${bottom} ${right - r},${bottom} 
-      L ${left + r},${bottom} 
-      Q ${left},${bottom} ${left},${bottom - r} 
-      L ${left},${top} 
-      L 0,${top} 
-      L 0,100% 
-      L 100%,100% 
-      L 100%,0 
-      Z
-    `;
-
-    return `path('${svgPath}')`;
-  };
   return (
     <div ref={containerRef} className="relative">
       {/* Sticky container that stays in view during scroll */}
