@@ -1,15 +1,28 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import DashboardPanel from './components/DashboardPanel';
+import DetailInfoPanel from './components/DetailInfoPanel';
 
 function App() {
   const containerRef = useRef(null);
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [hoveredPanel, setHoveredPanel] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  // Smoother transform values - removed invalid easing syntax
+  // Check if animation is complete
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.onChange((progress) => {
+      setIsAnimationComplete(progress >= 0.8);
+    });
+    return unsubscribe;
+  }, [scrollYProgress]);
+
+  // ... existing transform values remain the same ...
   const sectionBTranslateX = useTransform(scrollYProgress, [0, 0.8], ['5%', '0%']);
   const sectionBTranslateY = useTransform(scrollYProgress, [0, 0.8], ['-15%', '0%']);
   const sectionBRotateX = useTransform(scrollYProgress, [0, 0.8], [20, 0]);
@@ -20,16 +33,12 @@ function App() {
   const sectionBRight = useTransform(scrollYProgress, [0, 0.8], ['-10%', '0%']);
   const sectionBWidth = useTransform(scrollYProgress, [0, 0.8], ['70%', '100%']);
 
-  // Section A transforms
-  const sectionAScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.6]);
+  const sectionAScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.3]);
   const sectionAOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const sectionATranslateX = useTransform(scrollYProgress, [0, 0.6], ['0%', '-120%']);
-  const sectionAWidth = useTransform(scrollYProgress, [0, 0.6], ['55%', '0%']);
+  const sectionAWidth = useTransform(scrollYProgress, [0, 0.6], ['55%', '10%']);
 
-  // Overlay transforms
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.8], [0.8, 0]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.4], [0.4, 0]);
 
-  // Dynamic border radius - starts rounded, becomes sharp
   const dashboardBorderRadius = useTransform(
     scrollYProgress,
     [0, 0.8],
@@ -37,10 +46,7 @@ function App() {
   );
 
   const controls = {
-    // Section A
     sectionAWidth: '55%',
-
-    // Section B Position Controls
     sectionB: {
       translateZ: '0px',
       perspective: '1500px',
@@ -49,28 +55,21 @@ function App() {
       opacity: 1,
       width: '70%',
     },
-
-    // Overlay Controls
     overlay: {
-      color: 'rgba(0,0,0,0.8)',
-      angle: '75deg',
+      color: 'rgba(0,0,0,0.9)',
+      angle: '70deg',
     },
-
-    // Shadow Controls
     shadow: {
-      opacity: 0.3,
-      blur: '20px',
-      spread: '0px',
-      distance: '15px',
-      color: 'rgba(0,0,0,0.3)',
+      opacity: 1,
+      blur: '2px',
+      spread: '100px',
+      distance: '40px',
+      color: 'rgba(0,0,0,0.9)',
     },
-
-    // Animation Controls
     animation: {
       breathingDuration: 3,
       breathingGlowIntensity: '20px',
     },
-
     panels: {
       gap: '1.5rem',
       borderRadius: '1.5rem',
@@ -82,6 +81,11 @@ function App() {
         opacity: 0.1,
         blur: '12px',
       }
+    },
+    // New hover overlay controls
+    hoverOverlay: {
+      opacity: 0.7, // Controllable opacity (0-1)
+      color: 'rgba(0, 0, 0, 1)' // Controllable color
     }
   };
 
@@ -99,8 +103,79 @@ function App() {
     }
   };
 
+  const handlePanelHover = (index, event, isEntering) => {
+    if (!isAnimationComplete) return;
+
+    if (isEntering) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Detail panel dimensions
+      const detailPanelWidth = 320;
+      const detailPanelHeight = 280; // Approximate height
+      const margin = 20; // Margin from edges and hovered panel
+
+      // Calculate available space on all sides
+      const spaceLeft = rect.left;
+      const spaceRight = viewportWidth - rect.right;
+      const spaceTop = rect.top;
+      const spaceBottom = viewportHeight - rect.bottom;
+
+      let x, y, position;
+
+      // Determine best horizontal position
+      if (spaceRight >= detailPanelWidth + margin) {
+        // Show on right side
+        x = rect.right + margin;
+        position = 'right';
+      } else if (spaceLeft >= detailPanelWidth + margin) {
+        // Show on left side
+        x = rect.left - detailPanelWidth - margin;
+        position = 'left';
+      } else {
+        // Not enough horizontal space, try vertical positioning
+        if (spaceBottom >= detailPanelHeight + margin) {
+          // Show below
+          x = Math.max(margin, Math.min(rect.left, viewportWidth - detailPanelWidth - margin));
+          y = rect.bottom + margin;
+          position = 'bottom';
+        } else if (spaceTop >= detailPanelHeight + margin) {
+          // Show above
+          x = Math.max(margin, Math.min(rect.left, viewportWidth - detailPanelWidth - margin));
+          y = rect.top - detailPanelHeight - margin;
+          position = 'top';
+        } else {
+          // Fallback: show on the side with more space, allow some overlap if necessary
+          if (spaceRight >= spaceLeft) {
+            x = Math.min(rect.right + margin, viewportWidth - detailPanelWidth - margin);
+            position = 'right';
+          } else {
+            x = Math.max(margin, rect.left - detailPanelWidth - margin);
+            position = 'left';
+          }
+        }
+      }
+
+      // For left/right positioning, center vertically within viewport constraints
+      if (position === 'left' || position === 'right') {
+        const preferredY = rect.top + (rect.height - detailPanelHeight) / 2;
+        y = Math.max(margin, Math.min(preferredY, viewportHeight - detailPanelHeight - margin));
+      }
+
+      setHoverPosition({
+        x,
+        y,
+        position,
+        panelRect: rect
+      });
+      setHoveredPanel(index);
+    } else {
+      setHoveredPanel(null);
+    }
+  };
+
   return (
-    // Hide scrollbars with CSS classes
     <div ref={containerRef} className="relative">
       {/* Sticky container that stays in view during scroll */}
       <div className="sticky top-0 h-screen w-screen bg-gray-100 overflow-hidden">
@@ -113,9 +188,9 @@ function App() {
             filter: `drop-shadow(${controls.shadow.distance} 0 ${controls.shadow.blur} ${controls.shadow.color})`,
             scale: sectionAScale,
             opacity: sectionAOpacity,
-            x: sectionATranslateX,
+            willChange: 'transform, opacity',
           }}
-          transition={{ ease: "easeOut" }} // Add smooth transition
+          transition={{ ease: "easeOut" }}
         >
           <motion.h1
             className="text-5xl font-bold px-12 -translate-x-12"
@@ -141,6 +216,7 @@ function App() {
             width: sectionBWidth,
             right: sectionBRight,
             perspective: controls.sectionB.perspective,
+            willChange: 'transform',
           }}
         >
           <motion.div
@@ -156,8 +232,10 @@ function App() {
               scale: sectionBScale,
               transformOrigin: `${controls.sectionB.originX} ${controls.sectionB.originY}`,
               opacity: controls.sectionB.opacity,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
-            transition={{ ease: "easeOut" }} // Add smooth transition
+            transition={{ ease: "easeOut" }}
           >
             {/* Dashboard Grid Container with dynamic border radius */}
             <motion.div
@@ -171,10 +249,19 @@ function App() {
                 backgroundColor: controls.panels.containerBackground,
                 boxShadow: '0 0 50px rgba(0,0,0,0.3)',
                 borderRadius: dashboardBorderRadius,
+                willChange: 'border-radius',
+                transform: 'translateZ(0)',
               }}
             >
               {[...Array(6)].map((_, index) => (
-                <DashboardPanel key={index} index={index} panelControls={controls.panels} />
+                <DashboardPanel
+                  key={index}
+                  index={index}
+                  panelControls={controls.panels}
+                  onHover={handlePanelHover}
+                  isAnimationComplete={isAnimationComplete}
+                  isHovered={hoveredPanel === index}
+                />
               ))}
             </motion.div>
           </motion.div>
@@ -186,10 +273,46 @@ function App() {
           style={{
             background: `linear-gradient(${controls.overlay.angle}, 
               transparent 45%, 
-              ${controls.overlay.color} 75%)`,
-            opacity: overlayOpacity
+              ${controls.overlay.color} 85%)`,
+            opacity: overlayOpacity,
+            willChange: 'opacity',
           }}
         />
+
+        {/* Hover Overlay - covers entire dashboard area when hovering */}
+        {hoveredPanel !== null && isAnimationComplete && (
+          <motion.div
+            className="absolute top-0 h-full z-40 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: controls.hoverOverlay.opacity }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              width: sectionBWidth,
+              right: sectionBRight,
+              backgroundColor: controls.hoverOverlay.color,
+              transform: `
+                translateX(${sectionBTranslateX}) 
+                translateY(${sectionBTranslateY}) 
+                rotateX(${sectionBRotateX}deg) 
+                rotateY(${sectionBRotateY}deg) 
+                rotateZ(${sectionBRotateZ}deg) 
+                scale(${sectionBScale})
+              `,
+              transformOrigin: `${controls.sectionB.originX} ${controls.sectionB.originY}`,
+              perspective: controls.sectionB.perspective,
+              borderRadius: dashboardBorderRadius,
+            }}
+          />
+        )}
+
+        {/* Detail Info Panel */}
+        {hoveredPanel !== null && isAnimationComplete && (
+          <DetailInfoPanel
+            panelIndex={hoveredPanel}
+            position={hoverPosition}
+          />
+        )}
       </div>
 
       {/* Much longer spacer div to ensure animation completes fully */}
@@ -211,16 +334,14 @@ function App() {
           overflow-x: hidden;
         }
         
-        /* Hide scrollbar for Chrome, Safari and Opera */
         ::-webkit-scrollbar {
           width: 0px;
           background: transparent;
         }
         
-        /* Hide scrollbar for IE, Edge and Firefox */
         html {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>

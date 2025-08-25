@@ -6,7 +6,7 @@ import StatsPanel from './dashboard/StatsPanel';
 import ContactPanel from './dashboard/ContactPanel';
 import EducationPanel from './dashboard/EducationPanel';
 
-const DashboardPanel = ({ index, panelControls }) => {
+const DashboardPanel = ({ index, panelControls, onHover, isAnimationComplete, isHovered }) => {
     const panels = [
         // Row 1
         {
@@ -49,7 +49,8 @@ const DashboardPanel = ({ index, panelControls }) => {
 
     return (
         <motion.div
-            className={`transform-gpu ${panels[index].className}`}
+            className={`transform-gpu transition-all duration-200 ${panels[index].className} ${isAnimationComplete ? 'hover:scale-105 hover:shadow-xl cursor-pointer' : ''
+                }`}
             style={{
                 gridArea: panels[index].gridArea,
                 backgroundColor: panelControls.backgroundColor,
@@ -57,11 +58,20 @@ const DashboardPanel = ({ index, panelControls }) => {
                 border: `${panelControls.borderWidth} solid ${panelControls.borderColor}`,
                 backdropFilter: `blur(${panelControls.glassEffect.blur})`,
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                // Ensure hovered panel stays above overlay (z-40), non-hovered stay below (z-10)
+                zIndex: isHovered ? 45 : 10,
+                position: 'relative',
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
+            onMouseEnter={(e) => onHover(index, e, true)}
+            onMouseLeave={(e) => onHover(index, e, false)}
+            whileHover={isAnimationComplete ? {
+                borderColor: 'rgba(168, 85, 247, 0.5)',
+                boxShadow: '0 12px 40px rgba(168, 85, 247, 0.2)'
+            } : {}}
         >
             <PanelComponent />
         </motion.div>

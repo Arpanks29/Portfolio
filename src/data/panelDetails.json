@@ -1,0 +1,62 @@
+{
+    "0": {
+        "title": "Professional Statistics",
+        "description": "Key metrics showcasing career achievements and professional growth over the years.",
+        "details": [
+            "5+ years of hands-on experience in software development",
+            "Successfully completed 20+ projects across various domains",
+            "Mastered 15+ technologies and frameworks",
+            "Received 5 professional awards and recognitions"
+        ]
+    },
+    "1": {
+        "title": "Career Timeline",
+        "description": "A chronological overview of professional journey and key milestones.",
+        "details": [
+            "Progressive career growth from Junior to Senior positions",
+            "Experience across startups, agencies, and corporations",
+            "Diverse technology stack experience",
+            "Leadership roles in recent positions"
+        ]
+    },
+    "2": {
+        "title": "Technical Skills",
+        "description": "Comprehensive overview of technical expertise organized by categories.",
+        "details": [
+            "Frontend: React ecosystem with modern frameworks",
+            "Backend: Node.js and Python for scalable solutions",
+            "DevOps: Container orchestration and CI/CD pipelines",
+            "Tools: Industry-standard development and design tools"
+        ]
+    },
+    "3": {
+        "title": "Recent Projects",
+        "description": "Latest project portfolio showcasing diverse technical implementations.",
+        "details": [
+            "E-commerce platform with modern payment integration",
+            "AI-powered analytics dashboard with machine learning",
+            "Cross-platform mobile application development",
+            "Data visualization tools with interactive charts"
+        ]
+    },
+    "4": {
+        "title": "Educational Background",
+        "description": "Academic achievements and continuous learning journey.",
+        "details": [
+            "Advanced degree in Computer Science with research focus",
+            "Specialized in Machine Learning and Software Engineering",
+            "Consistent academic excellence and honors",
+            "Active participation in research and grants"
+        ]
+    },
+    "5": {
+        "title": "Contact Information",
+        "description": "Professional contact details and social media presence.",
+        "details": [
+            "Professional email for business inquiries",
+            "Active GitHub profile with open-source contributions",
+            "LinkedIn presence for professional networking",
+            "Based in San Francisco, California"
+        ]
+    }
+}
