@@ -59,8 +59,8 @@ const DashboardPanel = ({ index, panelControls, onHover, isAnimationComplete, is
                 backdropFilter: `blur(${panelControls.glassEffect.blur})`,
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
                 overflow: 'hidden',
-                // Ensure hovered panel stays above overlay (z-40), non-hovered stay below (z-10)
-                zIndex: isHovered ? 45 : 10,
+                // All panels stay at same z-index since overlay handles the masking
+                zIndex: 10,
                 position: 'relative',
             }}
             initial={{ opacity: 0, y: 20 }}
@@ -73,7 +73,18 @@ const DashboardPanel = ({ index, panelControls, onHover, isAnimationComplete, is
                 boxShadow: '0 12px 40px rgba(168, 85, 247, 0.2)'
             } : {}}
         >
-            <PanelComponent />
+            {/* Content wrapper to ensure proper clipping */}
+            <div
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: panelControls.borderRadius,
+                    overflow: 'hidden',
+                    position: 'relative'
+                }}
+            >
+                <PanelComponent />
+            </div>
         </motion.div>
     );
 };

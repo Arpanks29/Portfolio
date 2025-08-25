@@ -5,9 +5,11 @@ import DetailInfoPanel from './components/DetailInfoPanel';
 
 function App() {
   const containerRef = useRef(null);
+  const dashboardRef = useRef(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [hoveredPanel, setHoveredPanel] = useState(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+  const [hoveredPanelRect, setHoveredPanelRect] = useState(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -39,6 +41,7 @@ function App() {
 
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.4], [0.4, 0]);
 
+  // Dynamic border radius for dashboard
   const dashboardBorderRadius = useTransform(
     scrollYProgress,
     [0, 0.8],
@@ -72,7 +75,7 @@ function App() {
     },
     panels: {
       gap: '1.5rem',
-      borderRadius: '1.5rem',
+      borderRadius: '1.5rem', // Keep panels with fixed rounded corners
       borderColor: 'rgba(255, 255, 255, 0.1)',
       borderWidth: '1px',
       backgroundColor: '#1a1a1a',
@@ -108,13 +111,27 @@ function App() {
 
     if (isEntering) {
       const rect = event.currentTarget.getBoundingClientRect();
+      const dashboardRect = dashboardRef.current?.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
+      // Calculate panel position relative to dashboard container
+      if (dashboardRect) {
+        const relativeRect = {
+          left: rect.left - dashboardRect.left,
+          top: rect.top - dashboardRect.top,
+          right: rect.right - dashboardRect.left,
+          bottom: rect.bottom - dashboardRect.top,
+          width: rect.width,
+          height: rect.height
+        };
+        setHoveredPanelRect(relativeRect);
+      }
+
       // Detail panel dimensions
       const detailPanelWidth = 320;
-      const detailPanelHeight = 280; // Approximate height
-      const margin = 20; // Margin from edges and hovered panel
+      const detailPanelHeight = 280;
+      const margin = 20;
 
       // Calculate available space on all sides
       const spaceLeft = rect.left;
@@ -126,27 +143,21 @@ function App() {
 
       // Determine best horizontal position
       if (spaceRight >= detailPanelWidth + margin) {
-        // Show on right side
         x = rect.right + margin;
         position = 'right';
       } else if (spaceLeft >= detailPanelWidth + margin) {
-        // Show on left side
         x = rect.left - detailPanelWidth - margin;
         position = 'left';
       } else {
-        // Not enough horizontal space, try vertical positioning
         if (spaceBottom >= detailPanelHeight + margin) {
-          // Show below
           x = Math.max(margin, Math.min(rect.left, viewportWidth - detailPanelWidth - margin));
           y = rect.bottom + margin;
           position = 'bottom';
         } else if (spaceTop >= detailPanelHeight + margin) {
-          // Show above
           x = Math.max(margin, Math.min(rect.left, viewportWidth - detailPanelWidth - margin));
           y = rect.top - detailPanelHeight - margin;
           position = 'top';
         } else {
-          // Fallback: show on the side with more space, allow some overlap if necessary
           if (spaceRight >= spaceLeft) {
             x = Math.min(rect.right + margin, viewportWidth - detailPanelWidth - margin);
             position = 'right';
@@ -157,7 +168,6 @@ function App() {
         }
       }
 
-      // For left/right positioning, center vertically within viewport constraints
       if (position === 'left' || position === 'right') {
         const preferredY = rect.top + (rect.height - detailPanelHeight) / 2;
         y = Math.max(margin, Math.min(preferredY, viewportHeight - detailPanelHeight - margin));
@@ -172,9 +182,41 @@ function App() {
       setHoveredPanel(index);
     } else {
       setHoveredPanel(null);
+      setHoveredPanelRect(null);
     }
   };
 
+  // Create clip-path to cut hole in overlay for hovered panel
+  const getOverlayClipPath = () => {
+    if (!hoveredPanelRect) return 'none';
+
+    const { left, top, right, bottom } = hoveredPanelRect;
+    const borderRadius = parseFloat(controls.panels.borderRadius) * 16; // Convert rem to px
+    const r = Math.min(borderRadius, (right - left) / 2, (bottom - top) / 2);
+
+    // Create SVG path for rounded rectangle hole
+    const svgPath = `
+      M 0,0 
+      L 0,${top} 
+      L ${left},${top} 
+      L ${left},${top + r} 
+      Q ${left},${top} ${left + r},${top} 
+      L ${right - r},${top} 
+      Q ${right},${top} ${right},${top + r} 
+      L ${right},${bottom - r} 
+      Q ${right},${bottom} ${right - r},${bottom} 
+      L ${left + r},${bottom} 
+      Q ${left},${bottom} ${left},${bottom - r} 
+      L ${left},${top} 
+      L 0,${top} 
+      L 0,100% 
+      L 100%,100% 
+      L 100%,0 
+      Z
+    `;
+
+    return `path('${svgPath}')`;
+  };
   return (
     <div ref={containerRef} className="relative">
       {/* Sticky container that stays in view during scroll */}
@@ -239,7 +281,8 @@ function App() {
           >
             {/* Dashboard Grid Container with dynamic border radius */}
             <motion.div
-              className="w-full h-full p-6"
+              ref={dashboardRef}
+              className="w-full h-full p-6 relative"
               style={{
                 display: 'grid',
                 gridTemplateRows: 'auto repeat(3, 1fr) auto',
@@ -263,6 +306,138 @@ function App() {
                   isHovered={hoveredPanel === index}
                 />
               ))}
+
+              {/* Hover Overlay with hole cut out for hovered panel */}
+              {hoveredPanel !== null && isAnimationComplete && hoveredPanelRect && (
+                <>
+                  {/* Four overlay rectangles around the hovered panel */}
+                  {/* Top overlay */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none z-30"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      backgroundColor: controls.hoverOverlay.color,
+                      clipPath: `polygon(0 0, 100% 0, 100% ${hoveredPanelRect.top}px, 0 ${hoveredPanelRect.top}px)`
+                    }}
+                  />
+
+                  {/* Bottom overlay */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none z-30"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      backgroundColor: controls.hoverOverlay.color,
+                      clipPath: `polygon(0 ${hoveredPanelRect.bottom}px, 100% ${hoveredPanelRect.bottom}px, 100% 100%, 0 100%)`
+                    }}
+                  />
+
+                  {/* Left overlay */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none z-30"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      backgroundColor: controls.hoverOverlay.color,
+                      clipPath: `polygon(0 ${hoveredPanelRect.top}px, ${hoveredPanelRect.left}px ${hoveredPanelRect.top}px, ${hoveredPanelRect.left}px ${hoveredPanelRect.bottom}px, 0 ${hoveredPanelRect.bottom}px)`
+                    }}
+                  />
+
+                  {/* Right overlay */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none z-30"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      backgroundColor: controls.hoverOverlay.color,
+                      clipPath: `polygon(${hoveredPanelRect.right}px ${hoveredPanelRect.top}px, 100% ${hoveredPanelRect.top}px, 100% ${hoveredPanelRect.bottom}px, ${hoveredPanelRect.right}px ${hoveredPanelRect.bottom}px)`
+                    }}
+                  />
+
+                  {/* Corner overlays to handle the rounded corners */}
+                  {/* Top-left corner */}
+                  <motion.div
+                    className="absolute pointer-events-none z-31"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      left: hoveredPanelRect.left,
+                      top: hoveredPanelRect.top,
+                      width: parseFloat(controls.panels.borderRadius) * 16,
+                      height: parseFloat(controls.panels.borderRadius) * 16,
+                      backgroundColor: controls.hoverOverlay.color,
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                      maskImage: `radial-gradient(circle at bottom right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
+                      WebkitMaskImage: `radial-gradient(circle at bottom right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
+                    }}
+                  />
+
+                  {/* Top-right corner */}
+                  <motion.div
+                    className="absolute pointer-events-none z-31"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      left: hoveredPanelRect.right - parseFloat(controls.panels.borderRadius) * 16,
+                      top: hoveredPanelRect.top,
+                      width: parseFloat(controls.panels.borderRadius) * 16,
+                      height: parseFloat(controls.panels.borderRadius) * 16,
+                      backgroundColor: controls.hoverOverlay.color,
+                      maskImage: `radial-gradient(circle at bottom left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
+                      WebkitMaskImage: `radial-gradient(circle at bottom left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
+                    }}
+                  />
+
+                  {/* Bottom-left corner */}
+                  <motion.div
+                    className="absolute pointer-events-none z-31"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      left: hoveredPanelRect.left,
+                      top: hoveredPanelRect.bottom - parseFloat(controls.panels.borderRadius) * 16,
+                      width: parseFloat(controls.panels.borderRadius) * 16,
+                      height: parseFloat(controls.panels.borderRadius) * 16,
+                      backgroundColor: controls.hoverOverlay.color,
+                      maskImage: `radial-gradient(circle at top right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
+                      WebkitMaskImage: `radial-gradient(circle at top right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
+                    }}
+                  />
+
+                  {/* Bottom-right corner */}
+                  <motion.div
+                    className="absolute pointer-events-none z-31"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: controls.hoverOverlay.opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      left: hoveredPanelRect.right - parseFloat(controls.panels.borderRadius) * 16,
+                      top: hoveredPanelRect.bottom - parseFloat(controls.panels.borderRadius) * 16,
+                      width: parseFloat(controls.panels.borderRadius) * 16,
+                      height: parseFloat(controls.panels.borderRadius) * 16,
+                      backgroundColor: controls.hoverOverlay.color,
+                      maskImage: `radial-gradient(circle at top left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
+                      WebkitMaskImage: `radial-gradient(circle at top left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
+                    }}
+                  />
+                </>
+              )}
             </motion.div>
           </motion.div>
         </motion.div>
@@ -278,33 +453,6 @@ function App() {
             willChange: 'opacity',
           }}
         />
-
-        {/* Hover Overlay - covers entire dashboard area when hovering */}
-        {hoveredPanel !== null && isAnimationComplete && (
-          <motion.div
-            className="absolute top-0 h-full z-40 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: controls.hoverOverlay.opacity }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              width: sectionBWidth,
-              right: sectionBRight,
-              backgroundColor: controls.hoverOverlay.color,
-              transform: `
-                translateX(${sectionBTranslateX}) 
-                translateY(${sectionBTranslateY}) 
-                rotateX(${sectionBRotateX}deg) 
-                rotateY(${sectionBRotateY}deg) 
-                rotateZ(${sectionBRotateZ}deg) 
-                scale(${sectionBScale})
-              `,
-              transformOrigin: `${controls.sectionB.originX} ${controls.sectionB.originY}`,
-              perspective: controls.sectionB.perspective,
-              borderRadius: dashboardBorderRadius,
-            }}
-          />
-        )}
 
         {/* Detail Info Panel */}
         {hoveredPanel !== null && isAnimationComplete && (
