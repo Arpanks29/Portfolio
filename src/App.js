@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import DashboardPanel from './components/DashboardPanel';
 import DetailInfoPanel from './components/DetailInfoPanel';
+import AnimatedBackground from './components/AnimatedBackground';
 
 function App() {
   const containerRef = useRef(null);
@@ -24,30 +25,20 @@ function App() {
     return unsubscribe;
   }, [scrollYProgress]);
 
-  // Faster, smoother transforms with inertia curves
+  // Transforms for the scroll animation
   const sectionBTranslateX = useTransform(scrollYProgress, [0, 0.4], ['5%', '0%']);
   const sectionBTranslateY = useTransform(scrollYProgress, [0, 0.4], ['-15%', '0%']);
   const sectionBRotateX = useTransform(scrollYProgress, [0, 0.4], [20, 0]);
   const sectionBRotateY = useTransform(scrollYProgress, [0, 0.4], [-20, 0]);
   const sectionBRotateZ = useTransform(scrollYProgress, [0, 0.4], [5, 0]);
-  // Added slight bounce back effect with overshoot and settle
   const sectionBScale = useTransform(scrollYProgress, [0, 0.3, 0.4, 0.45], [0.8, 1.02, 1, 1]);
-
   const sectionBRight = useTransform(scrollYProgress, [0, 0.4], ['-10%', '0%']);
   const sectionBWidth = useTransform(scrollYProgress, [0, 0.4], ['70%', '100%']);
-
-  const sectionAScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.3]); // Faster fade
-  const sectionAOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]); // Faster fade
-  const sectionAWidth = useTransform(scrollYProgress, [0, 0.3], ['55%', '10%']); // Faster fade
-
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.2], [0.4, 0]); // Much faster
-
-  // Dynamic border radius for dashboard
-  const dashboardBorderRadius = useTransform(
-    scrollYProgress,
-    [0, 0.4],
-    ['1.5rem', '0rem']
-  );
+  const sectionAScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.3]);
+  const sectionAOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const sectionAWidth = useTransform(scrollYProgress, [0, 0.3], ['55%', '10%']);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.2], [0.4, 0]);
+  const dashboardBorderRadius = useTransform(scrollYProgress, [0, 0.4], ['1.5rem', '0rem']);
 
   const controls = {
     sectionAWidth: '55%',
@@ -76,20 +67,19 @@ function App() {
     },
     panels: {
       gap: '1.5rem',
-      borderRadius: '1.5rem', // Keep panels with fixed rounded corners
+      borderRadius: '1.5rem',
       borderColor: 'rgba(255, 255, 255, 0.1)',
       borderWidth: '1px',
       backgroundColor: '#1a1a1a',
       containerBackground: '#141414',
       glassEffect: {
         opacity: 0.1,
-        blur: '12px',
+        blur: '5px',
       }
     },
-    // New hover overlay controls
     hoverOverlay: {
-      opacity: 0.7, // Controllable opacity (0-1)
-      color: 'rgba(0, 0, 0, 1)' // Controllable color
+      opacity: 0.7,
+      color: 'rgba(0, 0, 0, 1)'
     }
   };
 
@@ -116,7 +106,6 @@ function App() {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      // Calculate panel position relative to dashboard container
       if (dashboardRect) {
         const relativeRect = {
           left: rect.left - dashboardRect.left,
@@ -129,12 +118,10 @@ function App() {
         setHoveredPanelRect(relativeRect);
       }
 
-      // Detail panel dimensions
       const detailPanelWidth = 320;
       const detailPanelHeight = 280;
       const margin = 20;
 
-      // Calculate available space on all sides
       const spaceLeft = rect.left;
       const spaceRight = viewportWidth - rect.right;
       const spaceTop = rect.top;
@@ -142,7 +129,6 @@ function App() {
 
       let x, y, position;
 
-      // Determine best horizontal position
       if (spaceRight >= detailPanelWidth + margin) {
         x = rect.right + margin;
         position = 'right';
@@ -187,10 +173,8 @@ function App() {
     }
   };
 
-
   return (
     <div ref={containerRef} className="relative">
-      {/* Sticky container that stays in view during scroll */}
       <div className="sticky top-0 h-screen w-screen bg-gray-100 overflow-hidden">
         {/* Section A - Hero */}
         <motion.div
@@ -222,7 +206,7 @@ function App() {
           </motion.h1>
         </motion.div>
 
-        {/* Section B - Dashboard */}
+        {/* Section B - Dashboard with Animated Background */}
         <motion.div
           className="absolute top-0 h-full z-10"
           style={{
@@ -232,6 +216,10 @@ function App() {
             willChange: 'transform',
           }}
         >
+          {/* Animated Background */}
+          <AnimatedBackground controls={controls} />
+
+          {/* Main Dashboard */}
           <motion.div
             style={{
               position: 'absolute',
@@ -249,11 +237,10 @@ function App() {
               backfaceVisibility: 'hidden',
             }}
             transition={{
-              ease: [0.23, 1, 0.32, 1], // Custom cubic-bezier for smooth inertia
-              duration: 0.1 // Allows for responsive movement
+              ease: [0.23, 1, 0.32, 1],
+              duration: 0.1
             }}
           >
-            {/* Dashboard Grid Container with dynamic border radius */}
             <motion.div
               ref={dashboardRef}
               className="w-full h-full p-6 relative"
@@ -281,11 +268,9 @@ function App() {
                 />
               ))}
 
-              {/* Hover Overlay with hole cut out for hovered panel */}
+              {/* Hover Overlay */}
               {hoveredPanel !== null && isAnimationComplete && hoveredPanelRect && (
                 <>
-                  {/* Four overlay rectangles around the hovered panel */}
-                  {/* Top overlay */}
                   <motion.div
                     className="absolute inset-0 pointer-events-none z-30"
                     initial={{ opacity: 0 }}
@@ -297,8 +282,6 @@ function App() {
                       clipPath: `polygon(0 0, 100% 0, 100% ${hoveredPanelRect.top}px, 0 ${hoveredPanelRect.top}px)`
                     }}
                   />
-
-                  {/* Bottom overlay */}
                   <motion.div
                     className="absolute inset-0 pointer-events-none z-30"
                     initial={{ opacity: 0 }}
@@ -310,8 +293,6 @@ function App() {
                       clipPath: `polygon(0 ${hoveredPanelRect.bottom}px, 100% ${hoveredPanelRect.bottom}px, 100% 100%, 0 100%)`
                     }}
                   />
-
-                  {/* Left overlay */}
                   <motion.div
                     className="absolute inset-0 pointer-events-none z-30"
                     initial={{ opacity: 0 }}
@@ -323,8 +304,6 @@ function App() {
                       clipPath: `polygon(0 ${hoveredPanelRect.top}px, ${hoveredPanelRect.left}px ${hoveredPanelRect.top}px, ${hoveredPanelRect.left}px ${hoveredPanelRect.bottom}px, 0 ${hoveredPanelRect.bottom}px)`
                     }}
                   />
-
-                  {/* Right overlay */}
                   <motion.div
                     className="absolute inset-0 pointer-events-none z-30"
                     initial={{ opacity: 0 }}
@@ -334,80 +313,6 @@ function App() {
                     style={{
                       backgroundColor: controls.hoverOverlay.color,
                       clipPath: `polygon(${hoveredPanelRect.right}px ${hoveredPanelRect.top}px, 100% ${hoveredPanelRect.top}px, 100% ${hoveredPanelRect.bottom}px, ${hoveredPanelRect.right}px ${hoveredPanelRect.bottom}px)`
-                    }}
-                  />
-
-                  {/* Corner overlays to handle the rounded corners */}
-                  {/* Top-left corner */}
-                  <motion.div
-                    className="absolute pointer-events-none z-31"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: controls.hoverOverlay.opacity }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      left: hoveredPanelRect.left,
-                      top: hoveredPanelRect.top,
-                      width: parseFloat(controls.panels.borderRadius) * 16,
-                      height: parseFloat(controls.panels.borderRadius) * 16,
-                      backgroundColor: controls.hoverOverlay.color,
-                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
-                      maskImage: `radial-gradient(circle at bottom right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
-                      WebkitMaskImage: `radial-gradient(circle at bottom right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
-                    }}
-                  />
-
-                  {/* Top-right corner */}
-                  <motion.div
-                    className="absolute pointer-events-none z-31"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: controls.hoverOverlay.opacity }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      left: hoveredPanelRect.right - parseFloat(controls.panels.borderRadius) * 16,
-                      top: hoveredPanelRect.top,
-                      width: parseFloat(controls.panels.borderRadius) * 16,
-                      height: parseFloat(controls.panels.borderRadius) * 16,
-                      backgroundColor: controls.hoverOverlay.color,
-                      maskImage: `radial-gradient(circle at bottom left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
-                      WebkitMaskImage: `radial-gradient(circle at bottom left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
-                    }}
-                  />
-
-                  {/* Bottom-left corner */}
-                  <motion.div
-                    className="absolute pointer-events-none z-31"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: controls.hoverOverlay.opacity }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      left: hoveredPanelRect.left,
-                      top: hoveredPanelRect.bottom - parseFloat(controls.panels.borderRadius) * 16,
-                      width: parseFloat(controls.panels.borderRadius) * 16,
-                      height: parseFloat(controls.panels.borderRadius) * 16,
-                      backgroundColor: controls.hoverOverlay.color,
-                      maskImage: `radial-gradient(circle at top right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
-                      WebkitMaskImage: `radial-gradient(circle at top right, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
-                    }}
-                  />
-
-                  {/* Bottom-right corner */}
-                  <motion.div
-                    className="absolute pointer-events-none z-31"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: controls.hoverOverlay.opacity }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      left: hoveredPanelRect.right - parseFloat(controls.panels.borderRadius) * 16,
-                      top: hoveredPanelRect.bottom - parseFloat(controls.panels.borderRadius) * 16,
-                      width: parseFloat(controls.panels.borderRadius) * 16,
-                      height: parseFloat(controls.panels.borderRadius) * 16,
-                      backgroundColor: controls.hoverOverlay.color,
-                      maskImage: `radial-gradient(circle at top left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`,
-                      WebkitMaskImage: `radial-gradient(circle at top left, transparent ${parseFloat(controls.panels.borderRadius) * 16}px, black ${parseFloat(controls.panels.borderRadius) * 16}px)`
                     }}
                   />
                 </>
@@ -437,20 +342,17 @@ function App() {
         )}
       </div>
 
-      {/* Much longer spacer div to ensure animation completes fully */}
       <div className="h-[250vh] bg-transparent" />
 
-      {/* Optional: Content after the animation */}
       <div className="min-h-screen bg-white p-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold mb-8">More Content Below</h2>
           <p className="text-lg text-gray-600 leading-relaxed">
-            This section appears after the scroll animation completes. You can add more content here.
+            This section appears after the scroll animation completes.
           </p>
         </div>
       </div>
 
-      {/* Global styles to hide scrollbars */}
       <style jsx global>{`
         body {
           overflow-x: hidden;

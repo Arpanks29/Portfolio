@@ -56,7 +56,7 @@ const DashboardPanel = ({ index, panelControls, onHover, isAnimationComplete, is
                 backgroundColor: panelControls.backgroundColor,
                 borderRadius: panelControls.borderRadius,
                 border: `${panelControls.borderWidth} solid ${panelControls.borderColor}`,
-                backdropFilter: `blur(${panelControls.glassEffect.blur})`,
+                // backdropFilter: `blur(${panelControls.glassEffect.blur})`,
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
                 overflow: 'hidden',
                 // All panels stay at same z-index since overlay handles the masking
