@@ -19,32 +19,33 @@ function App() {
   // Check if animation is complete
   useEffect(() => {
     const unsubscribe = scrollYProgress.onChange((progress) => {
-      setIsAnimationComplete(progress >= 0.8);
+      setIsAnimationComplete(progress >= 0.4);
     });
     return unsubscribe;
   }, [scrollYProgress]);
 
-  // ... existing transform values remain the same ...
-  const sectionBTranslateX = useTransform(scrollYProgress, [0, 0.8], ['5%', '0%']);
-  const sectionBTranslateY = useTransform(scrollYProgress, [0, 0.8], ['-15%', '0%']);
-  const sectionBRotateX = useTransform(scrollYProgress, [0, 0.8], [20, 0]);
-  const sectionBRotateY = useTransform(scrollYProgress, [0, 0.8], [-20, 0]);
-  const sectionBRotateZ = useTransform(scrollYProgress, [0, 0.8], [5, 0]);
-  const sectionBScale = useTransform(scrollYProgress, [0, 0.8], [0.8, 1]);
+  // Faster, smoother transforms with inertia curves
+  const sectionBTranslateX = useTransform(scrollYProgress, [0, 0.4], ['5%', '0%']);
+  const sectionBTranslateY = useTransform(scrollYProgress, [0, 0.4], ['-15%', '0%']);
+  const sectionBRotateX = useTransform(scrollYProgress, [0, 0.4], [20, 0]);
+  const sectionBRotateY = useTransform(scrollYProgress, [0, 0.4], [-20, 0]);
+  const sectionBRotateZ = useTransform(scrollYProgress, [0, 0.4], [5, 0]);
+  // Added slight bounce back effect with overshoot and settle
+  const sectionBScale = useTransform(scrollYProgress, [0, 0.3, 0.4, 0.45], [0.8, 1.02, 1, 1]);
 
-  const sectionBRight = useTransform(scrollYProgress, [0, 0.8], ['-10%', '0%']);
-  const sectionBWidth = useTransform(scrollYProgress, [0, 0.8], ['70%', '100%']);
+  const sectionBRight = useTransform(scrollYProgress, [0, 0.4], ['-10%', '0%']);
+  const sectionBWidth = useTransform(scrollYProgress, [0, 0.4], ['70%', '100%']);
 
-  const sectionAScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.3]);
-  const sectionAOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const sectionAWidth = useTransform(scrollYProgress, [0, 0.6], ['55%', '10%']);
+  const sectionAScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.3]); // Faster fade
+  const sectionAOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]); // Faster fade
+  const sectionAWidth = useTransform(scrollYProgress, [0, 0.3], ['55%', '10%']); // Faster fade
 
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.4], [0.4, 0]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.2], [0.4, 0]); // Much faster
 
   // Dynamic border radius for dashboard
   const dashboardBorderRadius = useTransform(
     scrollYProgress,
-    [0, 0.8],
+    [0, 0.4],
     ['1.5rem', '0rem']
   );
 
@@ -247,7 +248,10 @@ function App() {
               willChange: 'transform',
               backfaceVisibility: 'hidden',
             }}
-            transition={{ ease: "easeOut" }}
+            transition={{
+              ease: [0.23, 1, 0.32, 1], // Custom cubic-bezier for smooth inertia
+              duration: 0.1 // Allows for responsive movement
+            }}
           >
             {/* Dashboard Grid Container with dynamic border radius */}
             <motion.div
@@ -434,7 +438,7 @@ function App() {
       </div>
 
       {/* Much longer spacer div to ensure animation completes fully */}
-      <div className="h-[500vh] bg-transparent" />
+      <div className="h-[250vh] bg-transparent" />
 
       {/* Optional: Content after the animation */}
       <div className="min-h-screen bg-white p-8">
